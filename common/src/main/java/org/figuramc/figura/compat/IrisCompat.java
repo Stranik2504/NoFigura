@@ -6,6 +6,7 @@ import org.figuramc.figura.model.rendering.texture.FiguraRenderTypes;
 
 public class IrisCompat {
     public static void assignPipelinesToIrisPrograms() {
-        IrisApi.getInstance().assignPipeline(FiguraRenderTypes.FiguraRenderPipelines.FIGURA_SOLID, IrisProgram.ENTITIES);
+        // TODO: Resole after release iris for this version
+        /*IrisApi.getInstance().assignPipeline(FiguraRenderTypes.FiguraRenderPipelines.FIGURA_SOLID, IrisProgram.ENTITIES);*/
     }
 }

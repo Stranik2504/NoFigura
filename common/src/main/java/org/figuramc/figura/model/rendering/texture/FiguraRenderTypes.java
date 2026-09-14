@@ -25,7 +25,7 @@ public enum FiguraRenderTypes {
     CUTOUT_EMISSIVE_SOLID(resourceLocation -> FiguraRenderType.CUTOUT_EMISSIVE_SOLID.apply(resourceLocation, true)),
 
     TRANSLUCENT(RenderTypes::entityTranslucent),
-    TRANSLUCENT_CULL(RenderTypes::entityTranslucentCull), // TODO: Check entityTranslucentCullItemTarget
+    TRANSLUCENT_CULL(RenderTypes::entityTranslucentCullItemTarget), // TODO: Check entityTranslucentCullItemTarget
 
     EMISSIVE(RenderTypes::eyes),
     EMISSIVE_SOLID(resourceLocation -> RenderTypes.beaconBeam(resourceLocation, false)),

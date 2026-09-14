@@ -105,34 +105,6 @@ public class SubmitNodeCollectionSubmitRedirectMixin {
         original.call(instance, (float) scaleVec.x, (float) scaleVec.y, (float) scaleVec.z);
     }
 
-    /*@Inject(method = "submitNameTag",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack$Pose;pose()Lorg/joml/Matrix4f;"))
-    private void setShadowMatrix(PoseStack poseStack, Vec3 nameTagAttachment, int offset, Component name, boolean seeThrough, int lightCoords, CameraRenderState camera, CallbackInfo ci, @Share("textMatrix") LocalRef<Matrix4f> textMatrix) {
-        if (!figura$enabled || figura$avatar == null || !figura$hasCustomNameplate || !figura$custom.shadow)
-            return;
-
-        textMatrix.set(poseStack.last().pose());
-
-        if (figura$enabled && figura$avatar != null && figura$hasCustomNameplate && figura$custom.shadow) {
-            poseStack.pushPose();
-            textMatrix.set(poseStack.last().pose());
-            poseStack.popPose();
-        }
-    }
-
-    @WrapOperation(method = "submitNameTag",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollection;submitNameTagPart(Lnet/minecraft/client/renderer/feature/TextFeatureRenderer$Submit;)V"))
-    private void figura$redirectSimple(SubmitNodeCollection instance, TextFeatureRenderer.Submit nameTag, Operation<Void> original) {
-        figura$handle(instance, null, submit, original, camera);
-    }
-
-    @WrapOperation(method = "submitNameTag",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/phase/TranslucentFeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/TranslucentSubmit;)V"))
-    private void figura$redirectTranslucent(TranslucentFeatureRenderPhase instance, TranslucentSubmit submit, Operation<Void> original,
-                                            @Local(argsOnly = true) Component name) {
-        figura$handle(null, instance, submit, original, camera);
-    }*/
-
     @WrapOperation(method = "submitNameTag",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollection;submitNameTagPart(Lnet/minecraft/client/renderer/feature/TextFeatureRenderer$Submit;)V"))
     private void figura$redirectSolid(SubmitNodeCollection instance, TextFeatureRenderer.Submit submit, Operation<Void> original,
