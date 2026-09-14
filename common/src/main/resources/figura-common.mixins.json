@@ -22,6 +22,7 @@
     "LivingEntityMixin",
     "MinecraftAccessor",
     "MinecraftMixin",
+    "PlayerSocialManagerMixin",
     "GuiSetScreenMixin",
     "NativeImageMixin",
     "PlayerAccessor",
