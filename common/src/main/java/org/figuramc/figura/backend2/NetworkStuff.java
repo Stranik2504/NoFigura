@@ -448,7 +448,7 @@ public class NetworkStuff {
                 FiguraToast.sendToast(FiguraText.of("backend.badge_clear_error"), FiguraToast.ToastType.ERROR);
                 return;
             }
-            FiguraToast.sendToast(FiguraText.of("backend.badge_cleared"));
+            FiguraToast.sendToast(FiguraText.of("backend.badge_clear"));
         });
     }
 
