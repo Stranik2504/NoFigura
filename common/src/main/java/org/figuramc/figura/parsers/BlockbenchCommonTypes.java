@@ -15,6 +15,9 @@ import java.util.regex.Pattern;
 
 @SuppressWarnings("unused")
 public class BlockbenchCommonTypes {
+    public static final byte FORMATLESS = 0x00;
+    public static final byte FORMAT_V4 = 0x01;
+    public static final byte FORMAT_V5 = 0x02;
     private static final FiguraVec3 ZERO = FiguraVec3.of(0, 0, 0);
     private static final FiguraVec4 ZERO4 = FiguraVec4.of(0, 0, 0, 0);
 

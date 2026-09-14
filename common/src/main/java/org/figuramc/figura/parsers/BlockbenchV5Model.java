@@ -4,6 +4,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -17,6 +18,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.regex.Pattern;
+
+import static org.figuramc.figura.parsers.BlockbenchCommonTypes.FORMAT_V5;
 
 public class BlockbenchV5Model extends ModelFormat {
     private static final FiguraVec3 ZERO = FiguraVec3.of(0, 0, 0);
@@ -123,9 +126,8 @@ public class BlockbenchV5Model extends ModelFormat {
             return source;
         }
         // if it is truly an expression, then this will work
-        // otherwise this is definitely invalid syntax, so we put a label on it
-        // in case it breaks
-        return String.format("-(%s)--v5", source);
+        // otherwise... oops?
+        return String.format("-(%s)", source);
     }
 
     @Override
@@ -157,6 +159,10 @@ public class BlockbenchV5Model extends ModelFormat {
             cn.add(StringTag.valueOf(collRep.name));
         }
         tag.put("cn", cn);
+
+        // FORMAT major << 4 + minor (i.e. 0xXY)
+        // 5.0 -> 0x50
+        tag.put("_v", ByteTag.valueOf(FORMAT_V5));
 
         return tag;
     }
