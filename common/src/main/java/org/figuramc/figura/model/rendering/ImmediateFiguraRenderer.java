@@ -362,7 +362,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
                 // fix pivots
                 FiguraMod.pushProfiler("fixMatricesPivot");
 
-                // Store calculated light level and parent overlay before pushing pose stack
+                // Store calculated light level and current overlay effect before pushing pose stack
                 PartCustomization oldPeek = customizationStack.peek();
                 int light = oldPeek.light;
                 int overlay = oldPeek.overlay;
