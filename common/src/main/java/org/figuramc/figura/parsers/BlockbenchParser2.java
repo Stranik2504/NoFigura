@@ -33,7 +33,8 @@ public class BlockbenchParser2 {
                                        Path modelPath,
                                        String json,
                                        String modelName,
-                                       String locatedWithin) throws Exception {
+                                       String locatedWithin,
+                                       @Nullable LoadOptions options) throws Exception {
         try {
             BlockbenchCommonTypes.ModelFormat model = GSON.fromJson(json, BlockbenchCommonTypes.ModelFormat.class);
 
@@ -46,7 +47,7 @@ public class BlockbenchParser2 {
                     FiguraMod.MOD_NAME
             ));
 
-            Intermediary container = new Intermediary(this);
+            Intermediary container = new Intermediary(this, options == null ? LoadOptions.DEFAULT : options);
             container.name = modelName;
             container.avatarRoot = avatarRoot;
             container.modelPath = modelPath;
@@ -75,9 +76,11 @@ public class BlockbenchParser2 {
      */
     public static class Intermediary {
         private final BlockbenchParser2 parser;
+        public final LoadOptions options;
 
-        public Intermediary(BlockbenchParser2 parser) {
+        public Intermediary(BlockbenchParser2 parser, LoadOptions options) {
             this.parser = parser;
+            this.options = options;
         }
 
         // supplied externally
@@ -106,16 +109,18 @@ public class BlockbenchParser2 {
                 this.textures.add(texRep);
                 // assign the same global index as others with the same name, or
                 // add a new index
-                textureNames.compute(texRep.name, (k, v) -> {
-                    if (v == null) {
-                        texRep.globalID = parser.nextTexture++;
-                        v = new HashMap<>();
-                    } else {
-                        texRep.globalID = v.values().iterator().next().globalID;
-                    }
-                    v.put(texRep.textureType, texRep);
-                    return v;
-                });
+                textureNames.compute(
+                        texRep.name, (k, v) -> {
+                            if (v == null) {
+                                texRep.globalID = parser.nextTexture++;
+                                v = new HashMap<>();
+                            } else {
+                                texRep.globalID = v.values().iterator().next().globalID;
+                            }
+                            v.put(texRep.textureType, texRep);
+                            return v;
+                        }
+                );
             }
         }
 
@@ -379,5 +384,19 @@ public class BlockbenchParser2 {
                 source.children.forEach(it -> collectionsByElement.put(it, localID));
             }
         }
+    }
+
+    /**
+     * part of avatar metadata
+     */
+    public static class LoadOptions {
+        public static final LoadOptions DEFAULT = new LoadOptions();
+
+        /**
+         * Whether to include part UUIDs when compiling models.
+         * Most people don't need these, so disabling them by default will save ~16B per part
+         * (even through compression)
+         */
+        public boolean partsWithUUIDs;
     }
 }

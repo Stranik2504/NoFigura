@@ -14,6 +14,7 @@ import org.figuramc.figura.utils.FiguraIdentifier;
 import org.figuramc.figura.utils.FiguraResourceListener;
 import org.figuramc.figura.utils.FiguraText;
 import org.figuramc.figura.utils.IOUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -125,24 +126,33 @@ public class LocalAvatarLoader {
                 loadState = LoadState.SOUNDS;
                 loadSounds(finalPath, nbt);
 
+                // metadata part 1
+                loadState = LoadState.METADATA1;
+                Path avatarJsonc = finalPath.resolve("avatar.jsonc");
+                Path avatarJson = finalPath.resolve("avatar.json");
+                String _meta;
+                if (Files.exists(avatarJsonc)) {
+                    _meta = IOUtils.readFile(avatarJsonc);
+                } else {
+                    _meta = IOUtils.readFile(avatarJson);
+                }
+                AvatarMetadataParser.Metadata metadata = AvatarMetadataParser.read(_meta);
+
+                CompoundTag metaNBT = AvatarMetadataParser.parse(metadata,_meta, IOUtils.getFileNameOrEmpty(finalPath));
+                nbt.put("metadata", metaNBT);
+                metaNBT.putString("uuid",target.id.toString());
+
                 // models
                 CompoundTag textures = new CompoundTag();
                 ListTag animations = new ListTag();
                 BlockbenchParser2 modelParser = new BlockbenchParser2();
 
                 loadState = LoadState.MODELS;
-                CompoundTag models = loadModels(finalPath, finalPath, modelParser, textures, animations, "");
+                CompoundTag models = loadModels(finalPath, finalPath, modelParser, textures, animations, "", metadata.loadOptions);
                 models.putString("name", "models");
 
-                // metadata
-                loadState = LoadState.METADATA;
-                String _meta = IOUtils.readFile(finalPath.resolve("avatar.json"));
-				var metadata = AvatarMetadataParser.read(_meta);
-
-				CompoundTag metaNBT = AvatarMetadataParser.parse(metadata,_meta, IOUtils.getFileNameOrEmpty(finalPath));
-				nbt.put("metadata", metaNBT);
-				metaNBT.putString("uuid",target.id.toString());
-
+                // apply customizations from metadata
+                loadState = LoadState.METADATA2;
 				AvatarMetadataParser.injectToModels(metadata, models);
 				AvatarMetadataParser.injectToTextures(metadata, textures);
 
@@ -258,7 +268,15 @@ public class LocalAvatarLoader {
         }
     }
 
-    private static CompoundTag loadModels(Path avatarFolder, Path currentFile, BlockbenchParser2 parser, CompoundTag textures, ListTag animations, String folders) throws Exception {
+    private static CompoundTag loadModels(
+            Path avatarFolder,
+            Path currentFile,
+            BlockbenchParser2 parser,
+            CompoundTag textures,
+            ListTag animations,
+            String folders,
+            @Nullable BlockbenchParser2.LoadOptions options
+    ) throws Exception {
         CompoundTag result = new CompoundTag();
         List<Path> subFiles = IOUtils.listPaths(currentFile);
         ListTag children = new ListTag();
@@ -268,14 +286,14 @@ public class LocalAvatarLoader {
                     continue;
                 String name = IOUtils.getFileNameOrEmpty(file);
                 if (Files.isDirectory(file)) {
-                    CompoundTag subfolder = loadModels(avatarFolder, file, parser, textures, animations, folders + name + ".");
+                    CompoundTag subfolder = loadModels(avatarFolder, file, parser, textures, animations, folders + name + ".", options);
                     if (!subfolder.isEmpty()) {
                         subfolder.putString("name", name);
                         BlockbenchCommonTypes.parseParent(name, subfolder);
                         children.add(subfolder);
                     }
                 } else if (file.toString().toLowerCase(Locale.US).endsWith(".bbmodel")) {
-                    ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders);
+                    ModelParseResult data = parser.parseModel(avatarFolder, file, IOUtils.readFile(file), name.substring(0, name.length() - 8), folders, options);
                     children.add(data.modelNbt());
                     animations.addAll(data.animationList());
 
@@ -395,6 +413,7 @@ public class LocalAvatarLoader {
         SCRIPTS,
         SOUNDS,
         MODELS,
-        METADATA
+        METADATA1,
+        METADATA2
     }
 }
