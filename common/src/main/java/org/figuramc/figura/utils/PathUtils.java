@@ -12,8 +12,8 @@ public class PathUtils {
         if (!path.startsWith(".")) path = "/" + path;
         return new PermissivePath(path
             .replaceAll("\\\\", "/")
-            .replaceAll("[\\.]([^\\./])", "/$1")
-            .replaceAll("\\/\\/", "/"));
+                .replaceAll("[.]([^./])", "/$1")
+                .replaceAll("//", "/"));
     }
 
     public static Path getPath (LuaValue path) {
@@ -40,7 +40,7 @@ public class PathUtils {
         String str = path == null ? "" : path.normalize().toString();
         return str
             .replaceAll("\\\\", "/")
-            .replaceAll("^\\/+", "");
+            .replaceAll("^/+", "");
     }
 
     public static String computeSafeString(String path) {
