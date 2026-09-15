@@ -36,80 +36,13 @@ import java.util.Map;
 import java.util.function.BiFunction;
 
 @Mixin(AvatarRenderer.class)
-public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> implements EntityRendererAccessor {
-
+public abstract class PlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
     public PlayerRendererMixin(EntityRendererProvider.Context context, PlayerModel entityModel, float shadowRadius) {
         super(context, entityModel, shadowRadius);
     }
 
     @Unique
     private Avatar avatar;
-
-    @Unique
-    boolean isNameRendering, hasScore;
-
-    @Override
-    public boolean figura$isRenderingName() {
-        return isNameRendering;
-    }
-
-    @Override
-    public boolean figura$hasScore() {
-        return hasScore;
-    }
-
-    // Push for scoreboard rendering
-    @Inject(method = "submitNameDisplay(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;pushPose()V"))
-    private void pushProfilerForRender(AvatarRenderState avatarRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState, CallbackInfo ci) {
-        FiguraMod.popPushProfiler("render");
-        FiguraMod.pushProfiler("scoreboard");
-    }
-
-    // Pop the profiler after everything's done
-    @Inject(method = "submitNameDisplay(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At(value = "TAIL"))
-    private void popProfiler(AvatarRenderState avatarRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState, CallbackInfo ci) {
-        isNameRendering = false;
-        FiguraMod.popProfiler(5);
-    }
-
-    @Inject(method = "submitNameDisplay(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", at = @At("HEAD"), cancellable = true)
-    private void renderNameTag(AvatarRenderState playerRenderState, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState cameraRenderState, CallbackInfo ci) {
-        hasScore = playerRenderState.scoreText != null;
-        isNameRendering = false;
-
-        // return on config or high entity distance
-        int config = Configs.ENTITY_NAMEPLATE.value;
-        Entity entity = Minecraft.getInstance().level.getEntity(playerRenderState.id);
-
-        if (config == 0 || AvatarManager.panic || !(entity instanceof Player player) || this.entityRenderDispatcher.distanceToSqr(player) > 4096)
-            return;
-
-        // get customizations
-        Avatar avatar = AvatarManager.getAvatarForPlayer(player.getUUID());
-        EntityNameplateCustomization custom = avatar == null || avatar.luaRuntime == null ? null : avatar.luaRuntime.nameplate.ENTITY;
-
-        // customization boolean, which also is the permission check
-        boolean hasCustom = custom != null && avatar.permissions.get(Permissions.NAMEPLATE_EDIT) == 1;
-        if (custom != null && avatar.permissions.get(Permissions.NAMEPLATE_EDIT) == 0) {
-            avatar.noPermissions.add(Permissions.NAMEPLATE_EDIT);
-        } else if (avatar != null) {
-            avatar.noPermissions.remove(Permissions.NAMEPLATE_EDIT);
-        }
-
-        // enabled
-        if (hasCustom && !custom.visible) {
-            ci.cancel();
-            return;
-        }
-
-        // If the user has an avatar equipped, figura nameplate rendering will be enabled so the profiler is pushed
-        if (hasCustom) {
-            FiguraMod.pushProfiler(FiguraMod.MOD_ID);
-            FiguraMod.pushProfiler(player.getName().getString());
-            FiguraMod.pushProfiler("nameplate");
-        }
-    }
-
 
 
     @Inject(at = @At(value = "INVOKE", shift = At.Shift.BEFORE, target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModelPart(Lnet/minecraft/client/model/geom/ModelPart;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V"), method = "renderHand")
