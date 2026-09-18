@@ -8,11 +8,11 @@ Please note we have a code of conduct, please follow it in all your interactions
 Note - do not merge upstream into your pr branch if a clean rebase is possible.
 
 1. Development happens on the default branch. ie; 1.20, etc
-2. Ensure the feature has not been denied and is in demand via the `📧丨mod-suggestions` channel in our [Discord](https://discord.figuramc.org/) or has the [Enhancement]([https://github.com/FiguraMC/Figura/labels/enhancement](https://github.com/FiguraMC/Figura/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement+)) tag in the Issues tab.
+2. Ensure the feature has not been denied and is in demand via the `📧丨mod-suggestions` channel in our [Discord](https://discord.gg/weX4e9NC3T) or has the [Enhancement]([https://github.com/FiguraMC/Figura/labels/enhancement](https://github.com/FiguraMC/Figura/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement+)) tag in the Issues tab.
    
     OR:
 
-   Ensure what you are doing is actually a bug via the `👾丨bug-reports` channel in our [Discord](https://discord.figuramc.org/) or has the [Bug]([https://github.com/Stranik2504/NoFigura/issues](https://github.com/Stranik2504/NoFigura/issues?q=is%3Aissue+is%3Aopen+label%3Abug+)) tag in the Issues tab.
+   Ensure what you are doing is actually a bug via the `👾丨bug-reports` channel in our [Discord](https://discord.gg/weX4e9NC3T) or has the [Bug]([https://github.com/Stranik2504/NoFigura/issues](https://github.com/Stranik2504/NoFigura/issues?q=is%3Aissue+is%3Aopen+label%3Abug+)) tag in the Issues tab.
 
 3. Communicate with developers and other contributors about what you are building and adding. This helps keep multiple people from working on the same thing alone.
 
