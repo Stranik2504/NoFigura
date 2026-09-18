@@ -6,7 +6,10 @@ body:
   - type: markdown
     attributes:
       value: >-
-        Please make sure you have done the following:
+        **Note: This issue tracker is not intended for support requests!** If you need help with crashes or other issues, then
+        you should [ask on our Discord server](https://discord.gg/weX4e9NC3T) instead. 
+        <br><br>
+        Additionally, please make sure you have done the following:
         
         - **Have you ensured that all of your mods are up-to-date?** The latest version of Figura
         can always be found [on Modrinth](https://modrinth.com/mod/nofigura) or [on CurseForge](https://curseforge.com/minecraft/mc-mods/nofigura).

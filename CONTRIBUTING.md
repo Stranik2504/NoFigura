@@ -1,17 +1,25 @@
 # Contributing
 
+When contributing to Figura, please first discuss and/or interact with our community via our [Discord](https://discord.gg/weX4e9NC3T).
+
 Please note we have a code of conduct, please follow it in all your interactions with the project.
 
 ## Development Process
 Note - do not merge upstream into your pr branch if a clean rebase is possible.
 
-1. Development happens on the default branch. ie; 1.20, etc
+1. Development happens on the default branch. ie; 1.21.5, etc
 
-2. Communicate with developers and other contributors about what you are building and adding. This helps keep multiple people from working on the same thing alone.
+2. Ensure the feature has not been denied and is in demand via the `📩丨mod-suggestions` channel in our [Discord](https://discord.gg/weX4e9NC3T) or has the [Enhancement]([https://github.com/FiguraMC/Figura/labels/enhancement](https://github.com/FiguraMC/Figura/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement+)) tag in the Issues tab.
 
-3. Clearly and extensively document everything you've added/changed in the pull request. This helps when compiling all the changes into full release patch notes and adding entries to the wiki.
+   OR:
 
-4. You may merge the Pull Request in once you have the sign-off of another developer, or if you do not have permission to do that, you may request a developer to merge it for you.
+   Ensure what you are doing is actually a bug via the `👾丨bug-report` channel in our [Discord](https://discord.gg/weX4e9NC3T) or has the [Bug]([https://github.com/Stranik2504/NoFigura/issues](https://github.com/Stranik2504/NoFigura/issues?q=is%3Aissue+is%3Aopen+label%3Abug+)) tag in the Issues tab.
+
+3. Communicate with developers and other contributors about what you are building and adding. This helps keep multiple people from working on the same thing alone.
+
+4. Clearly and extensively document everything you've added/changed in the pull request. This helps when compiling all the changes into full release patch notes and adding entries to the wiki.
+
+5. You may merge the Pull Request in once you have the sign-off of another developer, or if you do not have permission to do that, you may request a developer to merge it for you.
 
 ## Translation Contribution Process 
 1. You must be fluent and/or knowledgeable in the language you are translating to.
@@ -85,7 +93,8 @@ further defined and clarified by project maintainers.
 
 ### Enforcement
 
-All complaints will be reviewed and investigated and will result in a response that
+Instances of abusive, harassing, or otherwise unacceptable behavior may be
+reported by contacting the project team via a ticket in our [Discord](https://discord.gg/weX4e9NC3T). All complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
 Further details of specific enforcement policies may be posted separately.

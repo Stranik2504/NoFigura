@@ -1,0 +1,6 @@
+blank_issues_enabled: true
+contact_links:
+  - name: For help with other issues, join the Discord community
+    url: https://discord.gg/weX4e9NC3T
+    about: This is the best option for getting help with mod installation, performance issues, and any other support inquiries
+    # Copied from https://github.com/FiguraMC/Figura/blob/dev/.github/ISSUE_TEMPLATE/config.yml
