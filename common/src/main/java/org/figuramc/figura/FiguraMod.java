@@ -189,7 +189,7 @@ public class FiguraMod {
         Wiki("https://wiki.figuramc.org/", ColorUtils.Colors.AWESOME_BLUE.style),
         Kofi("https://ko-fi.com/skyrina", ColorUtils.Colors.KOFI.style),
         OpenCollective("https://opencollective.com/figura", ColorUtils.Colors.KOFI.style),
-        Discord("https://discord.figuramc.org/", ColorUtils.Colors.DISCORD.style),
+        Discord("https://discord.gg/weX4e9NC3T", ColorUtils.Colors.DISCORD.style),
         Github("https://github.com/Stranik2504/NoFigura", ColorUtils.Colors.GITHUB.style),
         Modrinth("https://modrinth.com/mod/nofigura", ColorUtils.Colors.MODRINTH.style),
         Curseforge("https://www.curseforge.com/minecraft/mc-mods/nofigura", ColorUtils.Colors.CURSEFORGE.style),
