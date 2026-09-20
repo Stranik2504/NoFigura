@@ -113,6 +113,7 @@ public class LocalAvatarLoader {
         Path finalPath = path;
         async(() -> {
             try {
+                FiguraMod.debug("--- avatar compiling: " + target.id + " ---");
                 // load as folder
                 CompoundTag nbt = new CompoundTag();
 
