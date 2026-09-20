@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@SuppressWarnings("unused")
 public class BlockbenchCommonTypes {
 
     public static Gson getGson() {
@@ -448,6 +449,19 @@ public class BlockbenchCommonTypes {
 
     public static class PointElement extends Element {
         Vector3f position;
+
+        @Override
+        public @Nullable CompoundTag toNBT(BlockbenchParser2.Intermediary context) {
+            CompoundTag tag = super.toNBT(context);
+            if (tag == null) return null;
+            if (position != null && origin == null && !position.equals(0, 0, 0))
+                tag.put("piv", vecToList(origin));
+
+            // Allow parent types for these; this is mostly useful for the pivot-type parent types
+            parseParent(name, tag);
+
+            return tag;
+        }
     }
 
     public static class Animation {
@@ -524,7 +538,7 @@ public class BlockbenchCommonTypes {
                     Vector3f trans;
                     boolean transX = isV5 && (kf3.channel.equals("rotation") || kf3.channel.equals("position"));
                     boolean transY = isV5 && (kf3.channel.equals("rotation"));
-                    switch(kf3.channel) {
+                    switch (kf3.channel) {
                         case "rotation" -> trans = rotTrans;
                         case "position" -> trans = posTrans;
                         default -> trans = DO_NOTHING;
