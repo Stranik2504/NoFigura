@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.debug.DebugScreenEntries;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.world.level.Level;
@@ -343,8 +344,8 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
 
                 // Store calculated light level and current overlay effect before pushing pose stack
                 PartCustomization oldPeek = customizationStack.peek();
-                int light = oldPeek.light;
-                int overlay = oldPeek.overlay;
+                int light = oldPeek.light != null ? oldPeek.light : LightCoordsUtil.FULL_BRIGHT;
+                int overlay = oldPeek.overlay != null ? oldPeek.overlay : OverlayTexture.NO_OVERLAY;
 
                 FiguraVec3 pivot = custom.getPivot().copy().add(custom.getOffsetPivot());
                 pivotOffsetter.setPos(pivot);
