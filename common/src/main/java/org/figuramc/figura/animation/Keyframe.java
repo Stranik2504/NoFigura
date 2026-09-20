@@ -119,7 +119,7 @@ public class Keyframe implements Comparable<Keyframe> {
                             //noinspection TextBlockMigration
                             trailers = "\n\n§6If you opened a 4.12 model file in 5.0, your keyframes might be corrupted.§r\n" +
                                     "§6You'll have to manually fix them; note that the X and Y values on rotation,§r\n" +
-                                    "§6 as well as the X value on position, need to be negated.§r\n";
+                                    "§6 as well as the X value on position, need to be negated.§r";
                         }
                         // text blocks are java 15+ only
                         //noinspection TextBlockMigration
