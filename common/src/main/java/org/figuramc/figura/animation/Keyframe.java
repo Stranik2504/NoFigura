@@ -102,13 +102,8 @@ public class Keyframe implements Comparable<Keyframe> {
                         LuaValue chunk = owner.loadScript(chunkName, source);
                         if (chunk == null) return null;
                         return KeyframeValue.function(chunk, chunkName);
-                    } catch (LuaError e2) { /* Maybe this is caused by a bad inversion? */
-                        if (source.endsWith("--v5")) {
-                            throw new LuaError(e2.getMessage() + "\n" +
-                                    "\nThis might have been caused by a bad automatic inversion when importing a 5.0 model:" +
-                                    "\nIf this keyframe is a statement and not an expression, include the word 'return'" +
-                                    "\nsomewhere in it (e.g. --[[ return ]] ) to skip inversion.");
-                        }
+                    } catch (LuaError e2) { /* yeah no it's garbage */
+                        // TODO: Notify users about V5 stuff
                         throw e2;
                     }
                 }
