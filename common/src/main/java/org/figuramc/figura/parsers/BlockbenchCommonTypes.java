@@ -508,8 +508,10 @@ public class BlockbenchCommonTypes {
         public static final FiguraVec3 v5_POS_TRANS = FiguraVec3.of(-1, 1, 1);
 
         private static final FiguraVec3 DO_NOTHING = FiguraVec3.of(1, 1, 1);
-        private static final FiguraVec3 LEFT_TIMING = FiguraVec3.of(-0.1, -0.1, -0.1);
-        private static final FiguraVec3 RIGHT_TIMING = FiguraVec3.of(0.1, 0.1, 0.1);
+        // so it turns out (double)0.1f != 0.1; it's actually 0.10000000149011612
+        // so that's what we need to check against; we're taking a float and shoving it into a double and back
+        private static final FiguraVec3 LEFT_TIMING = FiguraVec3.of(-0.1f, -0.1f, -0.1f);
+        private static final FiguraVec3 RIGHT_TIMING = FiguraVec3.of(0.1f, 0.1f, 0.1f);
 
         String name;
         String type;
