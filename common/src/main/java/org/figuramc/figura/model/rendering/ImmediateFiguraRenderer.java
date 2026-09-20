@@ -339,13 +339,13 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             boolean renderPivotParts = part.parentType.isPivot && allowPivotParts;
 
             if (renderPivot || renderTasks || renderPivotParts) {
+                // fix light and overlay
+                PartCustomization parent = customizationStack.peek();
+                int light = parent.light != null ? parent.light : LightCoordsUtil.FULL_BRIGHT;
+                int overlay = parent.overlay != null ? parent.overlay : OverlayTexture.NO_OVERLAY;
+
                 // fix pivots
                 FiguraMod.pushProfiler("fixMatricesPivot");
-
-                // Store calculated light level and current overlay effect before pushing pose stack
-                PartCustomization oldPeek = customizationStack.peek();
-                int light = oldPeek.light != null ? oldPeek.light : LightCoordsUtil.FULL_BRIGHT;
-                int overlay = oldPeek.overlay != null ? oldPeek.overlay : OverlayTexture.NO_OVERLAY;
 
                 FiguraVec3 pivot = custom.getPivot().copy().add(custom.getOffsetPivot());
                 pivotOffsetter.setPos(pivot);
