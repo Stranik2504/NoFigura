@@ -258,7 +258,8 @@ public class BlockbenchV5Model extends ModelFormat {
                         chld.add(childTag);
                     }
                 }
-                tag.put("chld", chld);
+                if (!chld.isEmpty())
+                    tag.put("chld", chld);
 
                 Set<AnimationRepresentation> animations = context.animationsByElement.get(uuid);
                 if (animations != null) {
