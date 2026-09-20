@@ -3,6 +3,9 @@ package org.figuramc.figura.mixin.render.renderers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -104,6 +107,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
         Avatar localAvatar = currentAvatar;
         M model = getModel();
 
+        // capture whether this submit is the first person special submit;
+        // Avatar.firstPerson stays true until renderAllFeatures finishes, so it can't be read at render time
+        boolean firstPerson = Avatar.firstPerson;
+
         // so basically set the figura callbacks up before the model is submitted
         FiguraSubmitCallBackExtension submitCallBackExtension = (FiguraSubmitCallBackExtension) model;
         submitCallBackExtension.figura$addPreRenderingCallback((bufferSource, pose) -> {
@@ -111,15 +118,68 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             // do pos/rot/scale, then visibility
             figura$transformParts(localAvatar, model);
             figura$doPosTransform(localAvatar, model);
+
+            // hide the vanilla body in the first person special submit so it doesn't block the view
+            if (firstPerson)
+                figura$hideVanillaParts(model);
+
             return true;
         });
 
         submitCallBackExtension.figura$addPostRenderingCallback(() -> {
             // Restore transform
+            if (firstPerson)
+                figura$restoreVanillaParts(model);
+
             if (localAvatar.luaRuntime != null)
                 localAvatar.luaRuntime.vanilla_model.PLAYER.restore(getModel());
         });
     }
+
+    @Unique
+    private ModelPart[] figura$getVanillaParts(M model) {
+        if (model instanceof PlayerModel playerModel) {
+            return new ModelPart[] {
+                    playerModel.head,
+                    playerModel.hat,
+                    playerModel.body,
+                    playerModel.rightArm,
+                    playerModel.leftArm,
+                    playerModel.rightLeg,
+                    playerModel.leftLeg,
+                    playerModel.leftSleeve,
+                    playerModel.rightSleeve,
+                    playerModel.leftPants,
+                    playerModel.rightPants,
+                    playerModel.jacket
+            };
+        }
+        if (model instanceof HumanoidModel<?> humanoidModel) {
+            return new ModelPart[] {
+                    humanoidModel.head,
+                    humanoidModel.hat,
+                    humanoidModel.body,
+                    humanoidModel.rightArm,
+                    humanoidModel.leftArm,
+                    humanoidModel.rightLeg,
+                    humanoidModel.leftLeg
+            };
+        }
+        return new ModelPart[0];
+    }
+
+    @Unique
+    private void figura$hideVanillaParts(M model) {
+        for (ModelPart part : figura$getVanillaParts(model))
+            part.visible = false;
+    }
+
+    @Unique
+    private void figura$restoreVanillaParts(M model) {
+        for (ModelPart part : figura$getVanillaParts(model))
+            part.visible = true;
+    }
+
 
     // then submit the figura model once vanilla has set posing up
     @Inject(at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/EntityModel;setupAnim(Ljava/lang/Object;)V", shift = At.Shift.AFTER), method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V", cancellable = true)
