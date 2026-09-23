@@ -31,3 +31,8 @@ mandatory = true
 versionRange = "[${minecraft_version},)"
 ordering = "NONE"
 side = "CLIENT"
+
+[[dependencies.figura]]
+modId = "figurav5addon"
+type = "incompatible"
+reason = "This addon's features are already included in this Figura version!"
