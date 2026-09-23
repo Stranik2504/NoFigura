@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
@@ -57,7 +58,7 @@ public class FiguraGui {
             stack.last().pose().mul(guiGraphics.pose());
 
             avatar.hudRender(stack, HUD_SUBMIT_STORAGE, entity, tickDelta);
-            Minecraft.getInstance().gameRenderer.featureRenderDispatcher().renderAllFeatures(HUD_SUBMIT_STORAGE);
+            FeatureRenderDispatcher.renderAllFeatures(HUD_SUBMIT_STORAGE);
 
             stack.popPose();
             // hud hidden by script

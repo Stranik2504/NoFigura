@@ -2,6 +2,7 @@ package org.figuramc.figura.gui;
 
 import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
+import com.mojang.renderpearl.api.commands.RenderPass;
 import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.renderpearl.api.device.GpuDevice;
@@ -66,8 +67,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
         if (state.avatar() != null) {
             prepareTexturesAndProjectionForAvatar(state.avatar(), width, height);
             TextureEntry textureEntry = avatarToTexture.get(state.avatar());
-            RenderSystem.outputColorTextureOverride = textureEntry.textureView;
-            RenderSystem.outputDepthTextureOverride = textureEntry.depthTextureView;
 
             PoseStack poseStack = new PoseStack();
             poseStack.translate(width / 2.0F, this.getTranslateY(height, guiScale), 0.0F);
@@ -75,14 +74,21 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
             poseStack.scale(f, f, -f);
 
             this.renderToTexture(state, poseStack, this.submitNodeStorage);
-            featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
 
-            RenderSystem.outputColorTextureOverride = null;
-            RenderSystem.outputDepthTextureOverride = null;
+            try (
+                    FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
+                    RenderPass pass = RenderSystem.getDevice()
+                            .createCommandEncoder()
+                            .createRenderPass(() -> "FiguraPortrait", textureEntry.textureView, java.util.Optional.empty(), textureEntry.depthTextureView, java.util.OptionalDouble.empty());
+            ) {
+                RenderSystem.bindDefaultUniforms(pass);
+                FeatureRenderDispatcher.renderAllFeatures(pass, frame);
+            }
+
             this.blitTexture(state, guiRenderState);
-        }
-        else
+        } else {
             super.prepare(state, guiRenderState, featureRenderDispatcher, guiScale);
+        }
     }
 
     private void prepareTexturesAndProjectionForAvatar(Avatar avatar, int i, int j) {

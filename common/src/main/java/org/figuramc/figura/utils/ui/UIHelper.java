@@ -1,5 +1,6 @@
 package org.figuramc.figura.utils.ui;
 
+import com.mojang.blaze3d.Blaze3D;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.font.GlyphInfo;
@@ -60,6 +61,7 @@ import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.lang.Math;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.function.Consumer;
@@ -608,7 +610,7 @@ public final class UIHelper {
     public static Runnable openURL(String url) {
         Minecraft minecraft = Minecraft.getInstance();
         return () -> minecraft.gui.setScreen(new FiguraConfirmScreen.FiguraConfirmLinkScreen((bl) -> {
-            if (bl) Util.getPlatform().openUri(url);
+            if (bl) Blaze3D.openUri(URI.create(url));
         }, url, minecraft.gui.screen()));
     }
 

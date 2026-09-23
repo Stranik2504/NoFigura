@@ -1,6 +1,6 @@
 package org.figuramc.figura.gui.widgets.avatar;
 
-import net.minecraft.util.Util;
+import com.mojang.blaze3d.Blaze3D;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -54,10 +54,10 @@ public abstract class AbstractAvatarWidget extends AbstractContainerElement impl
         });
         context.addAction(FiguraText.of("gui.context.open_folder"), null, button -> {
             try {
-                Util.getPlatform().openUri(avatar.getFSPath().toUri());
+                Blaze3D.openUri(avatar.getFSPath().toUri());
             } catch (Exception e) {
                 FiguraMod.debug("failed to open avatar folder: ", e.getMessage());
-                Util.getPlatform().openUri(LocalAvatarFetcher.getLocalAvatarDirectory().toUri());
+                Blaze3D.openUri(LocalAvatarFetcher.getLocalAvatarDirectory().toUri());
             }
         });
         context.addAction(FiguraText.of("gui.context.copy_path"), null, button -> {

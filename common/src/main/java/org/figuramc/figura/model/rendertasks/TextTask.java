@@ -69,25 +69,23 @@ public class TextTask extends RenderTask {
         Font.DisplayMode displayMode = seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET;
         float vertexOffset = outline ? FiguraMod.VERTEX_OFFSET : 0f;
 
+        Font.GlyphVisitor visitor = new Font.GlyphVisitor() {
+            @Override
+            public void acceptRenderable(TextRenderable renderable) {
+                VertexConsumer vc = buffer.getBuffer(renderable.renderType(displayMode));
+                renderable.render(matrix, vc, l, false);
+            }
+        };
+
         // background
         if (bg != 0) {
             int offset = alignment.apply(cacheWidth);
             float x1 = -1 - offset;
             float x2 = cacheWidth - offset;
-            VertexConsumer vertexConsumer = buffer.getBuffer(seeThrough ? RenderTypes.textBackgroundSeeThrough() : RenderTypes.textBackground());
-            vertexConsumer.addVertex(matrix, x1, -1f, vertexOffset).setColor(bg).setLight(l);
-            vertexConsumer.addVertex(matrix, x1, cacheHeight, vertexOffset).setColor(bg).setLight(l);
-            vertexConsumer.addVertex(matrix, x2, cacheHeight, vertexOffset).setColor(bg).setLight(l);
-            vertexConsumer.addVertex(matrix, x2, -1f, vertexOffset).setColor(bg).setLight(l);
+            TextRenderable backgroundEffect = font.prepareBackground(x1, -1f, x2, cacheHeight, bg);
+            VertexConsumer vc = buffer.getBuffer(backgroundEffect.renderType(displayMode));
+            backgroundEffect.render(matrix, vc, l, false);
         }
-
-        Font.GlyphVisitor visitor = new Font.GlyphVisitor() {
-            @Override
-            public void acceptGlyph(TextRenderable.Styled glyph) {
-                VertexConsumer vc = buffer.getBuffer(glyph.renderType(displayMode));
-                glyph.render(matrix, vc, l, false);
-            }
-        };
 
         // text
         for (int i = 0, j = 0; i < text.size(); i++, j += (font.lineHeight + 1)) {

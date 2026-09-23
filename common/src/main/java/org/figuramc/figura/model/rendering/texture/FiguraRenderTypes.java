@@ -25,7 +25,7 @@ public enum FiguraRenderTypes {
     CUTOUT_EMISSIVE_SOLID(resourceLocation -> FiguraRenderType.CUTOUT_EMISSIVE_SOLID.apply(resourceLocation, true)),
 
     TRANSLUCENT(RenderTypes::entityTranslucent),
-    TRANSLUCENT_CULL(RenderTypes::entityTranslucentCullItemTarget), // TODO: Check entityTranslucentCullItemTarget
+    TRANSLUCENT_CULL(RenderTypes::entityTranslucentCull), // TODO: Check entityTranslucentCullItemTarget
 
     EMISSIVE(RenderTypes::eyes),
     EMISSIVE_SOLID(resourceLocation -> RenderTypes.beaconBeam(resourceLocation, false)),
@@ -35,8 +35,8 @@ public enum FiguraRenderTypes {
     END_GATEWAY(t -> RenderTypes.endGateway(), false),
     TEXTURED_PORTAL(FiguraRenderType.TEXTURED_PORTAL),
 
-    GLINT(t -> RenderTypes.entityGlint(), false, false),
-    GLINT2(t -> RenderTypes.glint(), false, false), // TODO: Make it one: entitySolidGlint???
+    GLINT(t -> RenderTypes.patternedShieldGlint(), false, false),
+    GLINT2(t -> RenderTypes.trimmedArmorGlint(), false, false),
     TEXTURED_GLINT(FiguraRenderType.TEXTURED_GLINT, true, false),
 
     LINES(t -> RenderTypes.lines(), false),
