@@ -2,10 +2,8 @@ package org.figuramc.figura.model;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.nbt.ByteTag;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.nbt.*;
 import net.minecraft.util.Mth;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.animation.Animation;
@@ -20,6 +18,7 @@ import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.rendering.Vertex;
 import org.figuramc.figura.model.rendering.texture.FiguraRenderTypes;
 import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
+import org.figuramc.figura.parsers.BlockbenchCommonTypes;
 import org.figuramc.figura.utils.MathUtils;
 
 import java.util.*;
@@ -29,8 +28,26 @@ import java.util.*;
  * was becoming really massive. Reduces bloat slightly
  */
 public class FiguraModelPartReader {
+    public static FiguraModelPart read(
+            Avatar owner,
+            CompoundTag partCompound,
+            List<FiguraTextureSet> textureSets,
+            boolean smoothNormals
+    ) {
+        return read(owner, partCompound, textureSets, smoothNormals, null);
+    }
 
-    public static FiguraModelPart read(Avatar owner, CompoundTag partCompound, List<FiguraTextureSet> textureSets, boolean smoothNormals) {
+    public static FiguraModelPart read(
+            Avatar owner,
+            CompoundTag partCompound,
+            List<FiguraTextureSet> textureSets,
+            boolean smoothNormals,
+            Byte inheritedFormatVersion
+    ) {
+        // if not present, assume v4
+        byte formatVersion = partCompound.contains("_v") ? partCompound.getByte("_v").orElseThrow() :
+                inheritedFormatVersion == null ? BlockbenchCommonTypes.FORMAT_V4 : inheritedFormatVersion;
+
         // Read name
         String name = partCompound.getStringOr("name", "");
 
@@ -49,12 +66,14 @@ public class FiguraModelPartReader {
         if (partCompound.contains("primary")) {
             try {
                 customization.setPrimaryRenderType(FiguraRenderTypes.valueOf(partCompound.getStringOr("primary", "")));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
         if (partCompound.contains("secondary")) {
             try {
                 customization.setSecondaryRenderType(FiguraRenderTypes.valueOf(partCompound.getStringOr("secondary", "")));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         if (partCompound.contains("vsb"))
@@ -87,10 +106,13 @@ public class FiguraModelPartReader {
         if (partCompound.contains("chld")) {
             ListTag listTag = partCompound.getListOrEmpty("chld");
             for (Tag tag : listTag)
-                children.add(read(owner, (CompoundTag) tag, textureSets, smoothNormals));
+                children.add(read(owner, (CompoundTag) tag, textureSets, smoothNormals, formatVersion));
         }
 
-        FiguraModelPart result = new FiguraModelPart(owner, name, customization, vertices, children);
+        FiguraModelPart result = new FiguraModelPart(
+                owner, name, customization, vertices,
+                children, formatVersion
+        );
 
         for (FiguraModelPart child : children)
             child.parent = result;
@@ -100,7 +122,8 @@ public class FiguraModelPartReader {
         if (partCompound.contains("pt")) {
             try {
                 result.parentType = ParentType.valueOf(partCompound.getStringOr("pt", ""));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         // Read animations :D
@@ -136,7 +159,10 @@ public class FiguraModelPartReader {
                         try {
                             interpolation = Interpolation.valueOf(keyframeNbt.getStringOr("int", "").toUpperCase(Locale.US));
                         } catch (Exception e) {
-                            FiguraMod.LOGGER.error("Invalid interpolation type in the model {}, something is wrong with this model!", keyframeNbt.getString("int"));
+                            FiguraMod.LOGGER.error(
+                                    "Invalid interpolation type in the model {}, something is wrong with this model!",
+                                    keyframeNbt.getString("int")
+                            );
                             FiguraMod.LOGGER.error("", e);
                             continue;
                         }
@@ -159,11 +185,27 @@ public class FiguraModelPartReader {
                         bezierLeftTime = MathUtils.clamp(bezierLeftTime, 0, 1);
                         bezierRightTime = MathUtils.clamp(bezierRightTime, 0, 1);
 
-                        keyframes.add(new Keyframe(owner, animation, time, interpolation, pre, end, bezierLeft, bezierRight, bezierLeftTime, bezierRightTime));
+                        keyframes.add(new Keyframe(
+                                owner,
+                                result,
+                                type,
+                                animation,
+                                time,
+                                interpolation,
+                                pre,
+                                end,
+                                bezierLeft,
+                                bezierRight,
+                                bezierLeftTime,
+                                bezierRightTime
+                        ));
                     }
 
                     keyframes.sort(Keyframe::compareTo);
-                    animation.addAnimation(result, new Animation.AnimationChannel(type, keyframes.toArray(new Keyframe[0])));
+                    animation.addAnimation(
+                            result,
+                            new Animation.AnimationChannel(type, keyframes.toArray(new Keyframe[0]))
+                    );
                 }
             }
         }
@@ -181,7 +223,10 @@ public class FiguraModelPartReader {
             readVec3(ret, keyframeVec);
             return Pair.of(ret, null);
         } else {
-            return Pair.of(null, new String[]{keyframeVec.getStringOr(0, ""), keyframeVec.getStringOr(1, ""), keyframeVec.getStringOr(2, "")});
+            return Pair.of(
+                    null,
+                    new String[]{keyframeVec.getString(0).orElse(""), keyframeVec.getString(1).orElse(""), keyframeVec.getString(2).orElse("")}
+            );
         }
     }
 
@@ -352,7 +397,9 @@ public class FiguraModelPartReader {
     };
 
 
-    private static void readCuboid(List<Integer> facesByTexture, CompoundTag data, Map<Integer, List<Vertex>> vertices) {
+    private static void readCuboid(List<Integer> facesByTexture,
+                                   CompoundTag data,
+                                   Map<Integer, List<Vertex>> vertices) {
         // Read from and to
         FiguraVec3 from = FiguraVec3.of();
         readVec3(from, data, "f");
@@ -375,7 +422,12 @@ public class FiguraModelPartReader {
             readFace(data.getCompoundOrEmpty("cube_data"), facesByTexture, direction, vertices, from, ftDiff);
     }
 
-    private static void readFace(CompoundTag faces, List<Integer> facesByTexture, String direction, Map<Integer, List<Vertex>> vertices, FiguraVec3 from, FiguraVec3 ftDiff) {
+    private static void readFace(CompoundTag faces,
+                                 List<Integer> facesByTexture,
+                                 String direction,
+                                 Map<Integer, List<Vertex>> vertices,
+                                 FiguraVec3 from,
+                                 FiguraVec3 ftDiff) {
         if (faces.contains(direction)) {
             CompoundTag face = faces.getCompoundOrEmpty(direction);
             short texId = face.getShortOr("tex", (short) 0);
