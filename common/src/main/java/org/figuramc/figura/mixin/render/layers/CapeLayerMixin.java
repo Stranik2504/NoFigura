@@ -45,17 +45,14 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
         super(renderLayerParent);
     }
 
-    @Unique
-    private Avatar avatar;
-
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At("HEAD"))
     private void preRender(PoseStack pose, SubmitNodeCollector submitNodeCollector, int i, AvatarRenderState playerRenderState, float f, float g, CallbackInfo ci) {
         ItemStack itemStack = playerRenderState.chestEquipment;
         if (playerRenderState.isInvisible || itemStack.is(Items.ELYTRA))
             return;
 
-        avatar = AvatarManager.getAvatar(playerRenderState);
-        if (avatar == null)
+        Avatar localAvatar = AvatarManager.getAvatar(playerRenderState);
+        if (localAvatar == null)
             return;
 
         // Acquire reference to fake cloak
@@ -98,7 +95,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
         // If someone wants to spend the time to correct these inaccuracies for us, feel free to make a pull request.
 
         // pos
-        if (itemStack.isEmpty() || (avatar.luaRuntime != null && !avatar.luaRuntime.vanilla_model.CHESTPLATE_BODY.checkVisible())) {
+        if (itemStack.isEmpty() || (localAvatar.luaRuntime != null && !localAvatar.luaRuntime.vanilla_model.CHESTPLATE_BODY.checkVisible())) {
             if (entity.isCrouching()) {
                 q += 25f;
                 fakeCloak.y = 2.25f;
@@ -132,16 +129,16 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
             );
 
             // Copy rotations from fake cloak
-            if (avatar.luaRuntime != null) {
-                VanillaPart part = avatar.luaRuntime.vanilla_model.CAPE;
+            if (localAvatar.luaRuntime != null) {
+                VanillaPart part = localAvatar.luaRuntime.vanilla_model.CAPE;
                 part.save(model);
-                if (avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 1)
+                if (localAvatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 1)
                     part.preTransform(model);
             }
 
             // Setup visibility for real cloak
-            if (RenderUtils.vanillaModelAndScript(avatar))
-                avatar.luaRuntime.vanilla_model.CAPE.posTransform(model);
+            if (RenderUtils.vanillaModelAndScript(localAvatar))
+                localAvatar.luaRuntime.vanilla_model.CAPE.posTransform(model);
 
             return true;
         });
@@ -150,7 +147,7 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
         poseStack.pushPose();
         poseStack.last().set(pose.last());
 
-        ((NodeCollectorExtension)submitNodeCollector).submitFiguraModel(avatar, playerRenderState, (avatar, renderState, multiBufferSource) -> {
+        ((NodeCollectorExtension)submitNodeCollector).submitFiguraModel(localAvatar, playerRenderState, (avatar, renderState, multiBufferSource) -> {
             // rot
             fakeCloak.setRotation(
                     (float) Math.toRadians(6f + finalR / 2f + finalQ),
@@ -171,13 +168,13 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
 
         });
         submitCallBackExtension.figura$addPostRenderingCallback(() -> {
-            if (avatar == null)
+            if (localAvatar == null)
                 return;
 
-            if (avatar.luaRuntime != null)
-                avatar.luaRuntime.vanilla_model.CAPE.restore(model);
+            if (localAvatar.luaRuntime != null)
+                localAvatar.luaRuntime.vanilla_model.CAPE.restore(model);
 
-            avatar = null;
+            localAvatar = null;
         });
     }
 }
