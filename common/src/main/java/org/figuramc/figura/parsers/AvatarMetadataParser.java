@@ -213,13 +213,12 @@ public class AvatarMetadataParser {
         return current;
     }
 
-
-
     // json object class
     public static class Metadata {
         public String name, description, author, version, color, background, id;
         public String[] authors, autoScripts, autoAnims, ignoredTextures, resources;
         public HashMap<String, Customization> customizations;
+        public BlockbenchParser2.LoadOptions loadOptions;
     }
 
     /**

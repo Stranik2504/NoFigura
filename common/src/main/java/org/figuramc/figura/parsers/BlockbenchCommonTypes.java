@@ -223,10 +223,12 @@ public class BlockbenchCommonTypes {
             if (Boolean.FALSE.equals(export)) return null;
 
             tag.putString("name", name);
-            try {
-                tag.putIntArray("nr", UUIDUtil.uuidToIntArray(UUID.fromString(uuid)));
-            } catch (IllegalArgumentException ignored) {
-                tag.putString("nr", uuid);
+            if (context.options.partsWithUUIDs) {
+                try {
+                    tag.putIntArray("nr", UUIDUtil.uuidToIntArray(UUID.fromString(uuid)));
+                } catch (IllegalArgumentException ignored) {
+                    tag.putString("nr", uuid);
+                }
             }
             if (rotation != null && !rotation.equals(ZERO)) {
                 tag.put("rot", vecToList(rotation));
