@@ -12,6 +12,7 @@ import org.figuramc.figura.model.ParentType;
 import org.figuramc.figura.model.rendering.texture.FiguraRenderTypes;
 import org.figuramc.figura.utils.PathUtils;
 import org.figuramc.figura.utils.Version;
+import org.joml.Vector2i;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -129,10 +130,10 @@ public class AvatarMetadataParser {
 
         for (String texture : metadata.ignoredTextures) {
             byte[] bytes = src.getByteArray(texture).orElse(new byte[0]);
-            int[] size = BlockbenchModelParser.getTextureSize(bytes);
+            Vector2i size = BlockbenchCommonTypes.getPNGDimensions(bytes);
             ListTag list = new ListTag();
-            list.add(IntTag.valueOf(size[0]));
-            list.add(IntTag.valueOf(size[1]));
+            list.add(IntTag.valueOf(size.x));
+            list.add(IntTag.valueOf(size.y));
             src.put(texture, list);
         }
     }
