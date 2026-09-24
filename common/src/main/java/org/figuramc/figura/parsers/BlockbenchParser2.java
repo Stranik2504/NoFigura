@@ -320,7 +320,7 @@ public class BlockbenchParser2 {
                     animationsByElement.compute(
                             entry.getKey(),
                             (k, v) -> {
-                                if (v == null) v = new HashSet<>();
+                                if (v == null) v = new LinkedHashSet<>();
                                 v.add(this);
                                 return v;
                             }
