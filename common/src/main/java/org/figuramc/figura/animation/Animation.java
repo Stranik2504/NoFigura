@@ -126,11 +126,22 @@ public class Animation {
 
         while (iter.hasNext()) {
             Map.Entry<Float, String> item = iter.next();
-            LuaValue chunk = owner.loadScript("animations." + modelName + "." + name, item.getValue());
+            try {
+                String chunkName = String.format(
+                        "animations.%s.%s instr keyframe (time=%.2fs)",
+                        modelName,
+                        name,
+                        item.getKey()
+                );
 
-            if (chunk != null) {
-                codeFrames.put(item.getKey(), chunk);
-                iter.remove();
+                LuaValue chunk = owner.loadScript(chunkName, item.getValue());
+                if (chunk != null) {
+                    codeFrames.put(item.getKey(), chunk);
+                    iter.remove();
+                }
+            } catch (LuaError e) {
+                if (owner.luaRuntime != null)
+                    owner.luaRuntime.error(e);
             }
         }
     }
