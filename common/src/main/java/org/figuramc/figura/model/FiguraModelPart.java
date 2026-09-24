@@ -1,5 +1,6 @@
 package org.figuramc.figura.model;
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import org.figuramc.figura.avatar.Avatar;
@@ -22,10 +23,14 @@ import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
 import org.figuramc.figura.model.rendertasks.*;
 import org.figuramc.figura.utils.LuaUtils;
 import org.figuramc.figura.utils.ui.UIHelper;
+import org.jetbrains.annotations.Nullable;
 import org.luaj.vm2.*;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.figuramc.figura.parsers.BlockbenchCommonTypes.FORMATLESS;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -46,6 +51,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 
     private final Map<String, FiguraModelPart> childCache = new HashMap<>();
     public final List<FiguraModelPart> children;
+    public final byte formatVersion;
 
     public List<Integer> facesByTexture;
 
@@ -72,12 +78,30 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
     @LuaFieldDoc("model_part.post_render")
     public LuaFunction postRender; // after children
 
-    public FiguraModelPart(Avatar owner, String name, PartCustomization customization, Map<Integer, List<Vertex>> vertices, List<FiguraModelPart> children) {
+    public FiguraModelPart(
+            Avatar owner,
+            String name,
+            PartCustomization customization,
+            Map<Integer, List<Vertex>> vertices,
+            List<FiguraModelPart> children
+    ) {
+        this(owner, name, customization, vertices, children, FORMATLESS);
+    }
+
+    public FiguraModelPart(
+            Avatar owner,
+            String name,
+            PartCustomization customization,
+            Map<Integer, List<Vertex>> vertices,
+            List<FiguraModelPart> children,
+            byte formatVersion
+    ) {
         this.owner = owner;
         this.name = name;
         this.customization = customization;
         this.vertices = vertices;
         this.children = children;
+        this.formatVersion = formatVersion;
     }
 
     public boolean pushVerticesImmediate(ImmediateFiguraRenderer avatarRenderer, int[] remainingComplexity) {
@@ -1498,7 +1522,7 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
 		if (name == null) name = this.name;
         PartCustomization customization = new PartCustomization();
         this.customization.copyTo(customization);
-        FiguraModelPart result = new FiguraModelPart(owner, name, customization, copyVertices(), new ArrayList<>(children));
+        FiguraModelPart result = new FiguraModelPart(owner, name, customization, copyVertices(), new ArrayList<>(children), formatVersion);
         result.facesByTexture = new ArrayList<>(facesByTexture);
         result.textures = new ArrayList<>(textures);
         result.parentType = parentType;
@@ -1526,7 +1550,11 @@ public class FiguraModelPart implements Comparable<FiguraModelPart> {
             value = "model_part.new_part"
     )
     public FiguraModelPart newPart(@LuaNotNil String name, String parentType) {
-        FiguraModelPart newer = new FiguraModelPart(owner, name, new PartCustomization(), new HashMap<>(), new ArrayList<>());
+        FiguraModelPart newer = new FiguraModelPart(owner, name,
+                new PartCustomization(),
+                new HashMap<>(),
+                new ArrayList<>()
+        );
         newer.facesByTexture = new ArrayList<>();
         newer.textures = new ArrayList<>();
 
