@@ -68,11 +68,7 @@ import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.permissions.PermissionManager;
 import org.figuramc.figura.permissions.PermissionPack;
 import org.figuramc.figura.permissions.Permissions;
-import org.figuramc.figura.utils.ColorUtils;
-import org.figuramc.figura.utils.EntityUtils;
-import org.figuramc.figura.utils.PathUtils;
-import org.figuramc.figura.utils.RefilledNumber;
-import org.figuramc.figura.utils.Version;
+import org.figuramc.figura.utils.*;
 import org.figuramc.figura.utils.ui.UIHelper;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
@@ -932,27 +928,27 @@ public class Avatar {
         return ret > 0;
     }
 
-    private static final PartCustomization PIVOT_PART_RENDERING_CUSTOMIZATION = new PartCustomization();
+    public static final boolean HAS_IRIS = PlatformUtils.isModLoaded("iris") || PlatformUtils.isModLoaded("oculus");
     public synchronized boolean pivotPartRender(ParentType parent, Consumer<PoseStack> consumer) {
         if (renderer == null || !loaded || !parent.isPivot)
             return false;
 
-        Queue<Pair<FiguraMat4, FiguraMat3>> queue = renderer.pivotCustomizations.computeIfAbsent(parent, p -> new ConcurrentLinkedQueue<>());
-
-        if (queue.isEmpty())
+        if (HAS_IRIS && net.irisshaders.iris.api.v0.IrisApi.getInstance().isRenderingShadowPass())
             return false;
 
-        int i = 0;
-        while (!queue.isEmpty() && i++ < 1000) { // limit of 1000 pivot part renders, just in case something goes infinitely somehow
-            Pair<FiguraMat4, FiguraMat3> matrixPair = queue.poll();
-            PIVOT_PART_RENDERING_CUSTOMIZATION.setPositionMatrix(matrixPair.getFirst());
-            PIVOT_PART_RENDERING_CUSTOMIZATION.setNormalMatrix(matrixPair.getSecond());
-            PIVOT_PART_RENDERING_CUSTOMIZATION.needsMatrixRecalculation = false;
-            PoseStack stack = PIVOT_PART_RENDERING_CUSTOMIZATION.copyIntoGlobalPoseStack();
-            consumer.accept(stack);
-        }
+        Queue<Pair<FiguraMat4, FiguraMat3>> queue = renderer.pivotCustomizations.get(parent);
+        if (queue == null || queue.isEmpty())
+            return false;
 
-        queue.clear();
+        Pair<FiguraMat4, FiguraMat3> matrixPair = queue.peek(); // первая (самая ранняя) запись за кадр
+
+        PartCustomization customization = new PartCustomization();
+        customization.setPositionMatrix(matrixPair.getFirst());
+        customization.setNormalMatrix(matrixPair.getSecond());
+        customization.needsMatrixRecalculation = false;
+        PoseStack stack = customization.copyIntoGlobalPoseStack();
+        consumer.accept(stack);
+
         return true;
     }
 
