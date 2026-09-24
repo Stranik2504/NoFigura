@@ -674,8 +674,8 @@ public class BlockbenchCommonTypes {
 
     public static class Texture {
         String name;
-        String source;
-        String relative_path;
+        @Nullable String source;
+        @Nullable String relative_path;
         Float width;
         Float height;
         Float uv_width;
