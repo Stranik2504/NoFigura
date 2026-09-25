@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.entity.layers.WingsLayer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -169,13 +170,15 @@ public class RenderUtils {
         // otherwise something is very wrong and this will cause out of bounds exceptions and other bad things
         assert (selection.size() >= 3);
 
-        AvatarRenderer<AbstractClientPlayer> avatarRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(Minecraft.getInstance().player);
+        @SuppressWarnings("unchecked")
+        AvatarRenderer<AbstractClientPlayer> avatarRenderer = (AvatarRenderer<AbstractClientPlayer>)
+                Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(Minecraft.getInstance().player);
 
         if (selection.get(1)) {
             PlayerModel playerModel = avatarRenderer.getModel();
             ((FiguraSubmitCallBackExtension) playerModel).figura$addPreRenderingCallback(preRender);
             ((FiguraSubmitCallBackExtension) playerModel).figura$addPostRenderingCallback(postRender);
-            submitNodeStorage.submitModel(playerModel, null, dummyPoseStack, RenderTypes.LINES, 0, 0, 0, null);
+            submitNodeStorage.submitModel(playerModel, null, dummyPoseStack, RenderTypes.LINES, 0, 0, 0);
         }
 
         if (selection.get(2)) {
@@ -193,13 +196,10 @@ public class RenderUtils {
             submitNodeStorage.submitItem(
                     dummyPoseStack, dummyContext,
                     0, 0, 0,
-                    new int[0], java.util.List.of(),
+                    new int[0], ItemQuads.EMPTY,
                     ItemStackRenderState.FoilType.NONE
             );
         }
-
-
-
     }
 
     public static <M extends Model<?>> Map<ModelPart, PartPose> captureModelState(M model) {

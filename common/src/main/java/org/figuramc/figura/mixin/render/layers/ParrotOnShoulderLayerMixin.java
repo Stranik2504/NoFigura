@@ -69,8 +69,7 @@ public abstract class ParrotOnShoulderLayerMixin extends RenderLayer<AvatarRende
                     this.model.renderType(ParrotRenderer.getVariantTexture(variant)),
                     light,
                     OverlayTexture.NO_OVERLAY,
-                    playerRenderState.outlineColor,
-                    null
+                    playerRenderState.outlineColor
             );
         })) {
             ci.cancel();

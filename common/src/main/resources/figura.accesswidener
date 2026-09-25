@@ -13,6 +13,11 @@ accessible field net/minecraft/client/renderer/state/gui/GuiTextRenderState x I
 accessible field net/minecraft/client/renderer/state/gui/GuiTextRenderState y I
 extendable class net/minecraft/client/renderer/state/gui/GuiTextRenderState
 
+accessible class net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer$TrimTextureKey
+accessible method net/minecraft/client/renderer/entity/layers/EquipmentLayerRenderer$TrimTextureKey <init> (Lnet/minecraft/world/item/equipment/trim/ArmorTrim;Lnet/minecraft/client/resources/model/EquipmentClientInfo$LayerType;Lnet/minecraft/client/resources/model/EquipmentClientInfo;)V
+
+accessible field net/minecraft/client/renderer/GameRenderer hud3DTarget Lcom/mojang/blaze3d/pipeline/RenderTarget;
+
 accessible class net/minecraft/client/gui/Font$PreparedTextBuilder
 accessible field net/minecraft/client/gui/Font$PreparedTextBuilder x F
 accessible field net/minecraft/client/gui/Font$PreparedTextBuilder y F

@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.client.resources.palette.PalettedTextureManager;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -291,20 +292,21 @@ public abstract class HumanoidArmorLayerMixinFabric<S extends HumanoidRenderStat
 
             if (k != 0) {
                 Identifier normalArmorResource = ((EquipmentLayerRendererAccessor)this.equipmentRenderer).layerTextureLookup().apply(new EquipmentLayerRenderer.LayerTextureKey(layerType, layer));
-                nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorCutoutNoCull(normalArmorResource), light, OverlayTexture.NO_OVERLAY, null, 0, null);
+                nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorCutoutNoCull(normalArmorResource), light, OverlayTexture.NO_OVERLAY, null, k, 0);
                 if (hasGlint)
-                    nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorEntityGlint(), light, OverlayTexture.NO_OVERLAY, null, 0, null);
+                    nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.trimmedArmorGlint(), light, OverlayTexture.NO_OVERLAY, null, k, 0);
                 hasGlint = false;
             }
         }
 
         ArmorTrim trim = itemStack.get(DataComponents.TRIM);
         if (trim != null) {
-            TextureAtlasSprite textureAtlasSprite = ((EquipmentLayerRendererAccessor)equipmentRenderer).trimSpriteLookup()
-                    .apply(new EquipmentLayerRenderer.TrimSpriteKey(trim, layerType, location.get()));
+            EquipmentClientInfo equipmentInfo = ((EquipmentLayerRendererAccessor) equipmentRenderer).figura$getAssetsManager().get(location.get());
+            PalettedTextureManager.Handle textureHandle = ((EquipmentLayerRendererAccessor) equipmentRenderer).trimTextureLookup()
+                    .apply(new EquipmentLayerRenderer.TrimTextureKey(trim, layerType, equipmentInfo));
+            RenderType renderType = RenderTypes.armorTrim(textureHandle.textureLocation(), trim.pattern().value().decal());
 
-            RenderType renderType = Sheets.armorTrimsSheet(trim.pattern().value().decal());
-            nodeCollector.order(order).submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, textureAtlasSprite, -1, null);
+            nodeCollector.order(order).submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, textureHandle, -1, 0);
         }
     }
 

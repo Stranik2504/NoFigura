@@ -1,26 +1,15 @@
 package org.figuramc.figura.gui;
 
-import com.mojang.blaze3d.ProjectionType;
-import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.platform.Window;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.ProjectionMatrixBuffer;
-import net.minecraft.client.renderer.SubmitNodeStorage;
-import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
-import org.joml.Matrix4f;
-import org.joml.Matrix4fStack;
+import org.figuramc.figura.mixin.gui.GuiGraphicsExtractorAccessor;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class FiguraGui {
-    private static final ProjectionMatrixBuffer guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("gui");
-    private static final SubmitNodeStorage HUD_SUBMIT_STORAGE = new SubmitNodeStorage();
 
     public static void onRender(GuiGraphicsExtractor guiGraphics, float tickDelta, CallbackInfo ci) {
         if (AvatarManager.panic)
@@ -28,64 +17,35 @@ public class FiguraGui {
 
         FiguraMod.pushProfiler(FiguraMod.MOD_ID);
 
-        // render popup menu below everything, as if it were in the world
         FiguraMod.pushProfiler("popupMenu");
         PopupMenu.render(guiGraphics);
         FiguraMod.popProfiler();
 
-        // get avatar
         Entity entity = Minecraft.getInstance().getCameraEntity();
         Avatar avatar = entity == null ? null : AvatarManager.getAvatar(entity);
 
-        Window window = Minecraft.getInstance().getWindow();
-        GpuBufferSlice previousProjectionMatrix = RenderSystem.getProjectionMatrixBuffer();
-        ProjectionType previousProjectionType = RenderSystem.getProjectionType();
-
-        RenderSystem.setProjectionMatrix(
-            guiProjectionMatrixBuffer.getBuffer(new Matrix4f().setOrtho(0.0F, (float)window.getWidth() / window.getGuiScale(), (float)window.getHeight() / window.getGuiScale(), 0.0F, 1000.0F, 11000.0F)),
-            ProjectionType.ORTHOGRAPHIC
-        );
-
-        Matrix4fStack matrix4fStack = RenderSystem.getModelViewStack();
-        matrix4fStack.pushMatrix();
-        matrix4fStack.translation(0.0F, 0.0F, -11000.0F);
-
         if (avatar != null) {
-            // hud parent type
-            PoseStack stack = new PoseStack();
-            stack.pushPose();
-            stack.setIdentity();
-            stack.last().pose().mul(guiGraphics.pose());
+            int width = guiGraphics.guiWidth();
+            int height = guiGraphics.guiHeight();
 
-            avatar.hudRender(stack, HUD_SUBMIT_STORAGE, entity, tickDelta);
-            FeatureRenderDispatcher.renderAllFeatures(HUD_SUBMIT_STORAGE);
+            FiguraHudRenderState state = new FiguraHudRenderState(avatar, entity, tickDelta, 0, 0, width, height, 1f, null);
+            ((GuiGraphicsExtractorAccessor) guiGraphics).figura$getRenderState().addPicturesInPictureState(state);
 
-            stack.popPose();
-            // hud hidden by script
             if (avatar.luaRuntime != null && !avatar.luaRuntime.renderer.renderHUD) {
-                // render figura overlays
                 renderOverlays(guiGraphics);
-                // cancel this method
                 ci.cancel();
             }
         }
-        matrix4fStack.popMatrix();
-        RenderSystem.setProjectionMatrix(previousProjectionMatrix, previousProjectionType);
 
         FiguraMod.popProfiler();
     }
 
     public static void renderOverlays(GuiGraphicsExtractor guiGraphics) {
         FiguraMod.pushProfiler(FiguraMod.MOD_ID);
-
-        // render paperdoll
         FiguraMod.pushProfiler("paperdoll");
         PaperDoll.render(guiGraphics, false);
-
-        // render wheel
         FiguraMod.popPushProfiler("actionWheel");
         ActionWheel.render(guiGraphics);
-
         FiguraMod.popProfiler(2);
     }
 }

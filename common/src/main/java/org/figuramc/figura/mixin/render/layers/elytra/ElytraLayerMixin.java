@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.client.resources.palette.PalettedTextureManager;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
@@ -206,13 +207,13 @@ public abstract class ElytraLayerMixin<T extends LivingEntity, S extends Humanoi
                     elytraModel.setupAnim(state);
                     return true;
                 });
-                nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorCutoutNoCull(normalArmorResource), light, OverlayTexture.NO_OVERLAY, null, -1, null);
+                nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorCutoutNoCull(normalArmorResource), light, OverlayTexture.NO_OVERLAY, null, -1, outlineColor);
                 if (hasGlint) {
                     ((FiguraSubmitCallBackExtension)(Object)modelPart).figura$addPreRenderingCallback((multiBufferSource, stack) -> {
                         elytraModel.setupAnim(state);
                         return true;
                     });
-                    nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.armorEntityGlint(), light, OverlayTexture.NO_OVERLAY, null, -1 , null);
+                    nodeCollector.order(order++).submitModelPart(modelPart, poseStack, RenderTypes.trimmedArmorGlint(), light, OverlayTexture.NO_OVERLAY, null, -1, outlineColor);
                 }
                 hasGlint = false;
             }
@@ -220,14 +221,12 @@ public abstract class ElytraLayerMixin<T extends LivingEntity, S extends Humanoi
 
         ArmorTrim trim = itemStack.get(DataComponents.TRIM);
         if (trim != null) {
-            TextureAtlasSprite textureAtlasSprite = ((EquipmentLayerRendererAccessor)equipmentRenderer).trimSpriteLookup()
-                    .apply(new EquipmentLayerRenderer.TrimSpriteKey(trim, layerType, location.get()));
-            RenderType renderType = Sheets.armorTrimsSheet(trim.pattern().value().decal());
-            ((FiguraSubmitCallBackExtension)(Object)modelPart).figura$addPreRenderingCallback((multiBufferSource, stack) -> {
-                elytraModel.setupAnim(state);
-                return true;
-            });
-            nodeCollector.order(order).submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, textureAtlasSprite, -1, null);
+            EquipmentClientInfo equipmentInfo = ((EquipmentLayerRendererAccessor) equipmentRenderer).figura$getAssetsManager().get(location.get());
+            PalettedTextureManager.Handle textureHandle = ((EquipmentLayerRendererAccessor) equipmentRenderer).trimTextureLookup()
+                    .apply(new EquipmentLayerRenderer.TrimTextureKey(trim, layerType, equipmentInfo));
+            RenderType renderType = RenderTypes.armorTrim(textureHandle.textureLocation(), trim.pattern().value().decal());
+
+            nodeCollector.order(order).submitModelPart(modelPart, poseStack, renderType, light, OverlayTexture.NO_OVERLAY, textureHandle, -1, outlineColor);
         }
     }
 }

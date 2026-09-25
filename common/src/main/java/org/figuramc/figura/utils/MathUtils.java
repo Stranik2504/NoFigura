@@ -99,7 +99,7 @@ public class MathUtils {
 
         Vector4f projectiveCamSpace = new Vector4f(camSpace, 1f);
         CameraRenderState cameraRenderState = new CameraRenderState();
-        camera.extractRenderState(cameraRenderState, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+        camera.extractRenderState(cameraRenderState, minecraft.getDeltaTracker());
         Matrix4f projMat = new Matrix4f(cameraRenderState.projectionMatrix);
         projMat.transform(projectiveCamSpace);
         float w = projectiveCamSpace.w();

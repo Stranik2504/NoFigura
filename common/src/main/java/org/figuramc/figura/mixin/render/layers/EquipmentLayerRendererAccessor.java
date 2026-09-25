@@ -4,6 +4,7 @@ import net.minecraft.client.renderer.entity.layers.EquipmentLayerRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.EquipmentAssetManager;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
+import net.minecraft.client.resources.palette.PalettedTextureManager;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -23,4 +24,7 @@ public interface EquipmentLayerRendererAccessor {
     static int getColorForLayer(EquipmentClientInfo.Layer layer, int i) {
         throw new AssertionError();
     }
+
+    @Accessor("trimTextureLookup")
+    Function<EquipmentLayerRenderer.TrimTextureKey, PalettedTextureManager.Handle> trimTextureLookup();
 }

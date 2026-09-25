@@ -1,9 +1,12 @@
 package org.figuramc.figura.mixin.fabric;
 
-import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.commands.RenderPass;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -13,7 +16,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
-import net.minecraft.client.renderer.state.level.LevelRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,6 +35,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
+
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixinFabric {
     @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
@@ -40,7 +45,7 @@ public class LevelRendererMixinFabric {
     @Shadow @Final private FeatureRenderDispatcher featureRenderDispatcher;
 
     @Inject(method = "render", at = @At("RETURN"))
-    private void renderLevelFirstPerson(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, CallbackInfo ci) {
+    private void renderLevelFirstPerson(GraphicsResourceAllocator resourceAllocator, boolean renderOutline, CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, boolean consistentDepthRequired, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         Camera camera = minecraft.gameRenderer.mainCamera();
         DeltaTracker dt = minecraft.getDeltaTracker();
@@ -90,7 +95,24 @@ public class LevelRendererMixinFabric {
             } while (((PoseStackAccessor) stack).getLastIndex() > lastIndex);
         }
 
-        featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
+        GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
+        RenderTarget mainTarget = gameRenderer.mainRenderTarget();
+
+        GpuTextureView depthTextureView = consistentDepthRequired
+                ? gameRenderer.hud3DTarget.getDepthTextureView()
+                : mainTarget.getDepthTextureView();
+
+        try (
+                FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
+                RenderPass pass = RenderSystem.getDevice()
+                        .createCommandEncoder()
+                        .createRenderPass(() -> "FiguraFirstPerson",
+                                mainTarget.getColorTextureView(), Optional.empty(),
+                                depthTextureView, OptionalDouble.empty());
+        ) {
+            RenderSystem.bindDefaultUniforms(pass);
+            FeatureRenderDispatcher.renderAllFeatures(pass, frame);
+        }
 
         Avatar.firstPerson = false;
     }
