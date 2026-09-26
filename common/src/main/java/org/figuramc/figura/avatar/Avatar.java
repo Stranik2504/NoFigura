@@ -741,6 +741,31 @@ public class Avatar {
         return bool;
     }
 
+    public boolean skullRender(PoseStack stack, SubmitNodeCollector submitNodeCollector, int light, Direction direction, float yaw) {
+        if (renderer == null || !loaded || !renderer.interceptRendersIntoFigura)
+            return false;
+
+        stack.pushPose();
+        stack.rotateDegrees(Axis.YP, yaw);
+
+        renderer.allowPivotParts = false;
+
+        renderer.setupRenderer(
+                PartFilterScheme.SKULL, submitNodeCollector, stack,
+                1f, light, 1f, OverlayTexture.NO_OVERLAY,
+                false, false, 0
+        );
+
+        int comp = renderer.renderSpecialParts();
+        complexity.use(comp);
+
+        boolean bool = comp > 0 || headRender(stack, submitNodeCollector, light, true);
+
+        renderer.allowPivotParts = true;
+        stack.popPose();
+        return bool;
+    }
+
     public boolean headRender(PoseStack stack, FiguraVertexConsumerProvider bufferProvider, int light, boolean useComplexity) {
         if (renderer == null || !loaded)
             return false;

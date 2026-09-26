@@ -119,6 +119,18 @@ public abstract class HumanoidArmorLayerMixinFabric<S extends HumanoidRenderStat
         figura$setPartVisibility(humanoidModel, armorSlot);
     }
 
+    @Inject(at = @At("HEAD"), method = "renderArmorPiece", cancellable = true)
+    public void figura$cancelHiddenArmor(PoseStack matrices, SubmitNodeCollector submitNodeCollector, ItemStack stack, EquipmentSlot armorSlot, int light, S state, CallbackInfo ci) {
+        if (figura$avatar == null || figura$renderingVanillaArmor)
+            return;
+
+        int armorEditPermission = figura$avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT);
+        if (armorEditPermission != 1)
+            return;
+
+        ci.cancel();
+    }
+
     @Unique
     private void figura$tryRenderArmorPart(EquipmentSlot slot, FiguraArmorPartRenderer<S, A> renderer, PoseStack vanillaPoseStack, S state, SubmitNodeCollector submitNodeCollector, int light, ParentType... parentTypes) {
         if (slot == null) return; // ?
