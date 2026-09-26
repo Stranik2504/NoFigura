@@ -32,17 +32,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SkullBlockRenderer.class)
 public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<SkullBlockEntity, SkullBlockRenderState>, FiguraSkullAvatarAssociationExtension {
-
     @Unique
-    private static Avatar avatar;
+    private Avatar noFigura$avatar;
     @Unique
     private static SkullBlockRenderState block;
+
+    @Override
+    public Avatar figura$getAvatar() {
+        return noFigura$avatar;
+    }
+
+    @Override
+    public void figura$setAvatar(Avatar avatar) {
+        this.noFigura$avatar = avatar;
+    }
 
     @Inject(at = @At("HEAD"), method = "submitSkull", cancellable = true)
     private static void renderSkull(float animationProgress, PoseStack stack, SubmitNodeCollector submitNodeCollector, int light, SkullModelBase model, RenderType renderType, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, CallbackInfo ci) {
         // retrieve avatar stored in RenderType
         Avatar localAvatar = ((FiguraSkullAvatarAssociationExtension)renderType).figura$getAvatar();
-        avatar = null;
+        // avatar = null;
 
         // parse block and items first, so we can yeet them in case of a missed event
 
@@ -60,7 +69,7 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
 
         // NOTE(luavixen): setting avatar=null was already here, so i'm leaving it to avoid breaking things
         //                 possibly remove later??
-        avatar = null;
+        // avatar = null;
 
         if (localAvatar == null || localAvatar.permissions.get(Permissions.CUSTOM_SKULL) == 0)
             return;
@@ -102,23 +111,20 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
 
     @Override
     public boolean shouldRenderOffScreen() {
-        Avatar localAvatar = avatar; // avatar pointer incase avatar variable is set during render.
+        Avatar localAvatar = figura$getAvatar(); // avatar pointer incase avatar variable is set during render.
         return localAvatar == null || localAvatar.permissions == null ? BlockEntityRenderer.super.shouldRenderOffScreen() : localAvatar.permissions.get(Permissions.OFFSCREEN_RENDERING) == 1;
     }
 
     @Inject(at = @At("RETURN"), method = "resolveSkullRenderType")
-    private static void getRenderType(SkullBlock.Type type, SkullBlockEntity skullBlockEntity, CallbackInfoReturnable<RenderType> cir) {
+    private void getRenderType(SkullBlock.Type type, SkullBlockEntity skullBlockEntity, CallbackInfoReturnable<RenderType> cir) {
         if (type == SkullBlock.Types.PLAYER) {
             ResolvableProfile profile = skullBlockEntity.getOwnerProfile();
 
             if (profile != null) {
-                avatar = AvatarManager.getAvatarForPlayer(profile.partialProfile().id());
-
                 // also write the avatar into the RenderType
                 RenderType renderType = cir.getReturnValue();
-                ((FiguraSkullAvatarAssociationExtension)renderType).figura$setAvatar(avatar);
+                ((FiguraSkullAvatarAssociationExtension)renderType).figura$setAvatar(figura$getAvatar());
             }
         }
-
     }
 }

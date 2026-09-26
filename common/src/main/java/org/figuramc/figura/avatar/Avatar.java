@@ -243,6 +243,7 @@ public class Avatar {
             }
 
             loaded = true;
+            Minecraft.getInstance().levelExtractor.allChanged();
         });
     }
 
