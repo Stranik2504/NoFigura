@@ -1,8 +1,10 @@
 package org.figuramc.figura.animation;
 
 import com.mojang.datafixers.util.Pair;
+import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.model.FiguraModelPart;
 import org.luaj.vm2.LuaError;
 import org.luaj.vm2.LuaValue;
 import org.luaj.vm2.Varargs;
@@ -28,6 +30,8 @@ public class Keyframe implements Comparable<Keyframe> {
     }
 
     private final Avatar owner;
+    private final FiguraModelPart part;
+    private final TransformType channel;
     private final Animation animation;
     private final float time;
     private final Interpolation interpolation;
@@ -40,6 +44,8 @@ public class Keyframe implements Comparable<Keyframe> {
     private final KeyframeValue[] bCache = {null, null, null};
 
     public Keyframe(Avatar owner,
+                    FiguraModelPart part,
+                    TransformType channel,
                     Animation animation,
                     float time,
                     Interpolation interpolation,
@@ -50,6 +56,8 @@ public class Keyframe implements Comparable<Keyframe> {
                     FiguraVec3 bezierLeftTime,
                     FiguraVec3 bezierRightTime) {
         this.owner = owner;
+        this.part = part;
+        this.channel = channel;
         this.animation = animation;
         this.time = time;
         this.interpolation = interpolation;
@@ -88,10 +96,20 @@ public class Keyframe implements Comparable<Keyframe> {
                 if (chunk == null) return null;
                 return KeyframeValue.function(chunk, chunkName);
             } catch (LuaError e) { /* chunk compile failed (probably syntax) */
-                // Try as a statement.
-                LuaValue chunk = owner.loadScript(chunkName, source);
-                if (chunk == null) return null;
-                return KeyframeValue.function(chunk, chunkName);
+                try {
+                    // Try as a statement.
+                    LuaValue chunk = owner.loadScript(chunkName, source);
+                    if (chunk == null) return null;
+                    return KeyframeValue.function(chunk, chunkName);
+                } catch (LuaError e2) { /* Maybe this is caused by a bad inversion? */
+                    if (source.endsWith("--v5")) {
+                        throw new LuaError(e2.getMessage() + "\n" +
+                                "\nThis might have been caused by a bad automatic inversion when importing a 5.0 model:" +
+                                "\nIf this keyframe is a statement and not an expression, include the word 'return'" +
+                                "\nsomewhere in it (e.g. --[[ return ]] ) to skip inversion.");
+                    }
+                    throw e2;
+                }
             }
         } catch (Exception e3) {
             // generic failure
@@ -141,10 +159,10 @@ public class Keyframe implements Comparable<Keyframe> {
     private String generateChunkName(int idx) {
         StringBuilder b = new StringBuilder();
         // note: scripts rely on the animation name followed by "keyframe" being at the start
-        b.append(animation.getName())
-                .append(" keyframe (")
-                .append(time)
-                .append("s, ");
+        b.append(animation.getName()).append(" keyframe (part '");
+        b.append(part.name);
+        b.append("', time ").append(time).append("s, ");
+        b.append(channel.name()).append(" ");
 
         switch (idx) {
             case 0: b.append("X"); break;
