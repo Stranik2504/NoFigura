@@ -17,17 +17,7 @@ public class Keyframe implements Comparable<Keyframe> {
      * <p>(the presence or absence of {@link KeyframeValue#function} implies which value is the "real" one)</p>
      * <p>{@link KeyframeValue#chunkName} is also stored in here so that we don't have to dig it out of the function</p>
      */
-    public static class KeyframeValue {
-        public final double literal;
-        public final LuaValue function;
-        public final String chunkName;
-
-        private KeyframeValue(double literal, LuaValue function, String chunkName) {
-            this.literal = literal;
-            this.function = function;
-            this.chunkName = chunkName;
-        }
-
+    public record KeyframeValue(double literal, LuaValue function, String chunkName) {
         public static KeyframeValue literal(double literal) {
             return new KeyframeValue(literal, null, null);
         }
