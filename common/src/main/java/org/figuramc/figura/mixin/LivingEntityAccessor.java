@@ -1,6 +1,7 @@
 package org.figuramc.figura.mixin;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.component.SwingAnimation;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -13,8 +14,8 @@ public interface LivingEntityAccessor {
     boolean figura$isJumping();
 
     @Intrinsic
-    @Invoker("getCurrentSwingDuration")
-    int getSwingDuration();
+    @Invoker("getModifiedSwingDuration")
+    int getSwingDuration(SwingAnimation animation);
 
     @Intrinsic
     @Invoker("updateWalkAnimation")

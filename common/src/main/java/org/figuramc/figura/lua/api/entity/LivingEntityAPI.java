@@ -167,8 +167,9 @@ public class LivingEntityAPI<T extends LivingEntity> extends EntityAPI<T> {
     @LuaWhitelist
     @LuaMethodDoc("living_entity.get_swing_duration")
     public int getSwingDuration() {
-      checkEntity();
-      return ((LivingEntityAccessor) entity).getSwingDuration();
+        checkEntity();
+        LivingEntity.SwingDescription swing = entity.getCurrentSwing();
+        return swing != null ? ((LivingEntityAccessor) entity).getSwingDuration(swing.animation()) : 0;
     }
 
     @LuaWhitelist

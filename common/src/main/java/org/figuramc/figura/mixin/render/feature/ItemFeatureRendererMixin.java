@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemFeatureRenderer.class)
 public class ItemFeatureRendererMixin {
     @Inject(method = "prepareSubmit", at = @At(value = "HEAD"), cancellable = true)
-    private void figura$preRender(ItemFeatureRenderer.Submit submit, boolean foil, CallbackInfo ci) {
+    private void figura$preRender(ItemFeatureRenderer.Submit submit, CallbackInfo ci) {
         FiguraSubmitCallBackExtension callBackExtension = (FiguraSubmitCallBackExtension) (Object) submit;
         var poseStack = figura$poseStackFromSubmit(submit);
 
@@ -33,7 +33,7 @@ public class ItemFeatureRendererMixin {
     }
 
     @Inject(method = "prepareSubmit", at = @At(value = "RETURN"))
-    private <S> void figura$postRender(ItemFeatureRenderer.Submit submit, boolean foil, CallbackInfo ci) {
+    private <S> void figura$postRender(ItemFeatureRenderer.Submit submit, CallbackInfo ci) {
         FiguraSubmitCallBackExtension callBackExtension = (FiguraSubmitCallBackExtension) (Object) submit;
 
         for (var callback : callBackExtension.figura$getPostRenderingCallbacks())

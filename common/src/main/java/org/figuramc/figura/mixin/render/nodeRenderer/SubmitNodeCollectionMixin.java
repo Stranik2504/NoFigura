@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.feature.FlameFeatureRenderer;
+import net.minecraft.client.renderer.feature.phase.FeatureRenderPhase;
 import net.minecraft.client.renderer.feature.phase.SimpleFeatureRenderPhase;
 import net.minecraft.client.renderer.feature.phase.TranslucentFeatureRenderPhase;
 import net.minecraft.client.renderer.feature.submit.SubmitNode;
@@ -22,8 +23,8 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(SubmitNodeCollection.class)
 public class SubmitNodeCollectionMixin {
     @WrapOperation(method = "submitModel",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/phase/TranslucentFeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/TranslucentSubmit;)V"))
-    private <S> void figura$transferTranslucent(TranslucentFeatureRenderPhase instance, TranslucentSubmit submit, Operation<Void> original, @Local(argsOnly = true) Model<? super S> model) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/phase/FeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/SubmitNode;)V"))
+    private <S, Submit extends SubmitNode> void figura$transferTranslucent(FeatureRenderPhase<? super TranslucentSubmit> instance, Submit submit, Operation<Void> original, @Local(argsOnly = true) Model<? super S> model) {
         figura$transfer(model, submit);
         original.call(instance, submit);
     }
@@ -59,9 +60,8 @@ public class SubmitNodeCollectionMixin {
     }
 
     @WrapOperation(method = "submitItem",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/phase/TranslucentFeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/TranslucentSubmit;)V"))
-    private void figura$onSubmitItemTranslucent(TranslucentFeatureRenderPhase instance, TranslucentSubmit submit, Operation<Void> original,
-                                                @Local(argsOnly = true) ItemDisplayContext displayContext) {
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/feature/phase/FeatureRenderPhase;submit(Lnet/minecraft/client/renderer/feature/submit/SubmitNode;)V"))
+    private <Submit extends SubmitNode> void figura$onSubmitItemTranslucent(FeatureRenderPhase<? super TranslucentSubmit> instance, Submit submit, Operation<Void> original, @Local(argsOnly = true) ItemDisplayContext displayContext) {
         figura$transferItem(displayContext, submit);
         original.call(instance, submit);
     }

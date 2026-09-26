@@ -3,6 +3,7 @@ package org.figuramc.figura.mixin.render.renderers;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.resources.model.geometry.ItemQuads;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -14,7 +15,7 @@ public interface ItemStackRenderState$LayerRenderStateAccessor {
 
     @Intrinsic
     @Accessor("quads")
-    List<BakedQuad> figura$getQuads();
+    ItemQuads figura$getQuads();
 
     @Intrinsic
     @Accessor("itemTransform")

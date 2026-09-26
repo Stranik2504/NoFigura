@@ -2,6 +2,7 @@ package org.figuramc.figura.mixin.render;
 
 import com.mojang.math.Axis;
 import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.avatar.Avatar;
@@ -142,18 +143,18 @@ public abstract class CameraMixin {
     }
 
     @Inject(method = "extractRenderState", at = @At("RETURN"))
-    private void extractRenderState(CameraRenderState cameraRenderState, float tickDelta, CallbackInfo ci) {
+    private void extractRenderState(CameraRenderState cameraState, DeltaTracker deltaTracker, CallbackInfo ci) {
         Avatar avatar = AvatarManager.getAvatar(entity);
 
         if (!RenderUtils.vanillaModelAndScript(avatar))
             return;
 
-        var vanillaViewRotation = new Matrix4f(cameraRenderState.viewRotationMatrix);
+        var vanillaViewRotation = new Matrix4f(cameraState.viewRotationMatrix);
 
         var mat = avatar.luaRuntime.renderer.cameraMat;
 
         if (mat != null) {
-            cameraRenderState.viewRotationMatrix.set(mat.toMatrix4f()).mul(vanillaViewRotation);
+            cameraState.viewRotationMatrix.set(mat.toMatrix4f()).mul(vanillaViewRotation);
             return;
         }
 
@@ -168,7 +169,7 @@ public abstract class CameraMixin {
             z += (float) offset.z;
 
         if (z != 0f)
-            cameraRenderState.viewRotationMatrix.rotation(Axis.ZP.rotationDegrees(z)).mul(vanillaViewRotation);
+            cameraState.viewRotationMatrix.rotation(Axis.ZP.rotationDegrees(z)).mul(vanillaViewRotation);
     }
 
 

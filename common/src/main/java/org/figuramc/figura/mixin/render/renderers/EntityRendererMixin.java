@@ -41,7 +41,7 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
     private static final String FIGURA$SUBMIT_NAME_TAG = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitNameTag(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/world/phys/Vec3;ILnet/minecraft/network/chat/Component;ZILnet/minecraft/client/renderer/state/level/CameraRenderState;)V";
 
     @Inject(at = @At("HEAD"), method = "shouldRender", cancellable = true)
-    private void shouldRender(T entity, Frustum frustum, double d, double e, double f, CallbackInfoReturnable<Boolean> cir) {
+    private void shouldRender(T entity, Frustum culler, double camX, double camY, double camZ, float partialTicks, CallbackInfoReturnable<Boolean> cir) {
         Avatar avatar = AvatarManager.getAvatar(entity);
         if (avatar != null && avatar.permissions.get(Permissions.OFFSCREEN_RENDERING) == 1)
             cir.setReturnValue(true);

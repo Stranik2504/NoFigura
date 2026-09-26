@@ -33,57 +33,25 @@ import java.util.List;
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin implements GameRendererAccessor {
 
-    @Shadow @Final
-    private Minecraft minecraft;
-
-    @Shadow private boolean effectActive;
-
-    @Shadow public abstract void checkEntityPostEffect(Entity entity);
-
-
-    @Shadow @Nullable
-    private Identifier postEffectId;
-
-    @Shadow @Final private CrossFrameResourcePool resourcePool;
+    @Shadow @Final private Minecraft minecraft;
+    @Shadow @Final private List<Identifier> requestedPostEffects;
     @Shadow @Final private GuiRenderer guiRenderer;
+
     @Unique
     private boolean avatarPostShader = false;
     @Unique
     private boolean hasShaders;
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))
-    private void render(DeltaTracker deltaTracker, boolean tick, CallbackInfo ci) {
+    @Inject(method = "update", at = @At("TAIL"))
+    private void figura$addAvatarPostEffect(DeltaTracker deltaTracker, CallbackInfo ci) {
         Entity entity = this.minecraft.getCameraEntity();
         Avatar avatar = AvatarManager.getAvatar(entity);
-        if (!RenderUtils.vanillaModelAndScript(avatar)) {
-            if (avatarPostShader) {
-                avatarPostShader = false;
-                this.checkEntityPostEffect(entity);
-            }
+        if (!RenderUtils.vanillaModelAndScript(avatar))
             return;
-        }
 
         Identifier resource = avatar.luaRuntime.renderer.postShader;
-        if (resource == null) {
-            if (avatarPostShader) {
-                avatarPostShader = false;
-                this.checkEntityPostEffect(entity);
-            }
-            return;
-        }
-
-        try {
-            avatarPostShader = true;
-            this.effectActive = true;
-            if (this.postEffectId == null || !this.postEffectId.equals(resource)) {
-                PostChain postchain = this.minecraft.getShaderManager().getPostChain(resource, LevelTargetBundle.MAIN_TARGETS);
-                if (postchain != null)
-                    postchain.process(this.minecraft.gameRenderer.mainRenderTarget(), this.resourcePool);
-            }
-        } catch (Exception ignored) {
-            this.effectActive = false;
-            avatar.luaRuntime.renderer.postShader = null;
-        }
+        if (resource != null)
+            this.requestedPostEffects.add(resource);
     }
 
     @Inject(method = "checkEntityPostEffect", at = @At("HEAD"), cancellable = true)
@@ -99,7 +67,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
 
     // bobbing fix courtesy of Iris; https://github.com/IrisShaders/Iris/blob/1.20.1/src/main/java/net/irisshaders/iris/mixin/MixinModelViewBobbing.java
     @Inject(method = "renderLevel", at = @At("HEAD"))
-    private void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
+    private void onRenderLevel(CallbackInfo ci) {
         hasShaders = ClientAPI.hasShaderPack();
     }
 

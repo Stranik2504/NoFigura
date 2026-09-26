@@ -32,7 +32,7 @@ public class ItemModelResolverMixin implements FiguraItemRendererExtension {
         Minecraft.getInstance().getItemModelResolver().updateForTopItem(figura$ScratchRenderState, stack, ItemDisplayContext.NONE, WorldAPI.getCurrentWorld(), null, 1);
 
         if (((FiguraItemStackRenderStateExtension)(this.figura$ScratchRenderState)).figura$getQuads() != null && !((FiguraItemStackRenderStateExtension) (this.figura$ScratchRenderState)).figura$getQuads().isEmpty())
-            return ((FiguraItemStackRenderStateExtension)(this.figura$ScratchRenderState)).figura$getQuads().size();
+            return ((FiguraItemStackRenderStateExtension)(this.figura$ScratchRenderState)).figura$getQuads().all().size();
         return 20;
     }
 }
