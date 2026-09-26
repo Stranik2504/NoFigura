@@ -98,15 +98,22 @@ public class BlockbenchCommonTypes {
         public abstract CompoundTag convert(BlockbenchParser2.Intermediary target);
     }
 
+    private static float floatOrZero(JsonElement it) {
+        if (!it.isJsonPrimitive()) return 0f;
+        JsonPrimitive prim = it.getAsJsonPrimitive();
+        if (!prim.isNumber()) return 0f;
+        return prim.getAsFloat();
+    }
+
     public static final JsonDeserializer<FiguraVec4> VEC4_DESERIALIZER = (json, typeOfT, context) -> {
         JsonArray four = json.getAsJsonArray();
         if (four.size() != 4)
             throw new JsonParseException("Trying to parse a Vector4, but the list has " + four.size() + " items (expected 4)");
         return FiguraVec4.of(
-                four.get(0).getAsFloat(),
-                four.get(1).getAsFloat(),
-                four.get(2).getAsFloat(),
-                four.get(3).getAsFloat()
+                floatOrZero(four.get(0)),
+                floatOrZero(four.get(1)),
+                floatOrZero(four.get(2)),
+                floatOrZero(four.get(3))
         );
     };
     public static final JsonDeserializer<FiguraVec3> VEC3_DESERIALIZER = (json, typeOfT, context) -> {
@@ -114,9 +121,9 @@ public class BlockbenchCommonTypes {
         if (three.size() != 3)
             throw new JsonParseException("Trying to parse a Vector3, but the list has " + three.size() + " items (expected 3)");
         return FiguraVec3.of(
-                three.get(0).getAsFloat(),
-                three.get(1).getAsFloat(),
-                three.get(2).getAsFloat()
+                floatOrZero(three.get(0)),
+                floatOrZero(three.get(1)),
+                floatOrZero(three.get(2))
         );
     };
     public static final JsonDeserializer<FiguraVec2> VEC2_DESERIALIZER = (json, typeOfT, context) -> {
@@ -124,8 +131,8 @@ public class BlockbenchCommonTypes {
         if (two.size() != 2)
             throw new JsonParseException("Trying to parse a Vector2, but the list has " + two.size() + " items (expected 2)");
         return FiguraVec2.of(
-                two.get(0).getAsFloat(),
-                two.get(1).getAsFloat()
+                floatOrZero(two.get(0)),
+                floatOrZero(two.get(1))
         );
     };
 
