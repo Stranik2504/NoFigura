@@ -13,6 +13,7 @@ import org.figuramc.figura.lua.api.keybind.FiguraKeybind;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -35,7 +36,7 @@ public class MouseHandlerMixin {
         if (avatar == null || avatar.luaRuntime == null)
             return;
 
-        if (avatar.mousePressEvent(mouseButtonInfo.button(), action, mouseButtonInfo.modifiers()) && (this.mouseGrabbed || this.minecraft.gui.screen() == null)) {
+        if (avatar.mousePressEvent(figura$toLuaButton(mouseButtonInfo.button()), action, mouseButtonInfo.modifiers()) && (this.mouseGrabbed || this.minecraft.gui.screen() == null)) {
             ci.cancel();
             return;
         }
@@ -49,9 +50,20 @@ public class MouseHandlerMixin {
             ci.cancel();
 
         if (avatar.luaRuntime != null && pressed && ActionWheel.isEnabled()) {
-            if (mouseButtonInfo.button() <= 1) ActionWheel.execute(ActionWheel.getSelected(), mouseButtonInfo.button() == 0);
+            if (mouseButtonInfo.button() == InputConstants.MOUSE_BUTTON_RIGHT || mouseButtonInfo.button() == InputConstants.MOUSE_BUTTON_LEFT)
+                ActionWheel.execute(ActionWheel.getSelected(), mouseButtonInfo.button() == InputConstants.MOUSE_BUTTON_LEFT);
             ci.cancel();
         }
+    }
+
+    @Unique
+    private static int figura$toLuaButton(int button) {
+        return switch (button) {
+            case InputConstants.MOUSE_BUTTON_LEFT -> 0;
+            case InputConstants.MOUSE_BUTTON_RIGHT -> 1;
+            case InputConstants.MOUSE_BUTTON_MIDDLE -> 2;
+            default -> button - 1;
+        };
     }
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)

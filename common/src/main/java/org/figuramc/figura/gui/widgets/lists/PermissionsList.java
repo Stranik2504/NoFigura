@@ -1,5 +1,6 @@
 package org.figuramc.figura.gui.widgets.lists;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -200,7 +201,7 @@ public class PermissionsList extends AbstractList {
             if (!this.isActive() || !this.isHoveredOrFocused() || !this.isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y()))
                 return false;
 
-            if (mouseButtonEvent.button() == 1) {
+            if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 container.reset(permissions);
                 this.parent.updateList(container);
                 playDownSound(Minecraft.getInstance().getSoundManager());
@@ -289,7 +290,7 @@ public class PermissionsList extends AbstractList {
             if (!this.isActive() || !this.isHoveredOrFocused() || !this.isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y()))
                 return false;
 
-            if (mouseButtonEvent.button() == 1) {
+            if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 container.reset(permissions);
                 this.parent.updateList(container);
                 playDownSound(Minecraft.getInstance().getSoundManager());
@@ -395,7 +396,7 @@ public class PermissionsList extends AbstractList {
             if (!this.isEnabled() || !this.isMouseOver(mouseButtonEvent.x(), mouseButtonEvent.y()))
                 return false;
 
-            if (mouseButtonEvent.button() == 1) {
+            if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_RIGHT) {
                 container.reset(permissions);
                 this.parent.updateList(container);
                 this.getField().playDownSound(Minecraft.getInstance().getSoundManager());

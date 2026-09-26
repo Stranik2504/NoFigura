@@ -1,6 +1,7 @@
 package org.figuramc.figura.gui.widgets.avatar;
 
 import com.mojang.blaze3d.Blaze3D;
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -98,7 +99,7 @@ public abstract class AbstractAvatarWidget extends AbstractContainerElement impl
             return true;
 
         // context menu on right click
-        if (button == 1) {
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
             context.setX((int) mouseX);
             context.setY((int) mouseY);
             context.setVisible(true);

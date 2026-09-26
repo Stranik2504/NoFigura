@@ -1,5 +1,6 @@
 package org.figuramc.figura.gui.screens;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Renderable;
@@ -155,7 +156,7 @@ public abstract class AbstractPanelScreen extends Screen {
             setFocused(widget);
 
         if (widget != null) {
-            if (mouseButtonEvent.button() == 0) this.setDragging(true);
+            if (mouseButtonEvent.button() == InputConstants.MOUSE_BUTTON_LEFT) this.setDragging(true);
             return true;
         }
 
@@ -227,7 +228,7 @@ public abstract class AbstractPanelScreen extends Screen {
         if (children().contains(panels) && panels.cycleTab(keyEvent.key()))
             return true;
 
-        if (keyEvent.key() == 256 && contextMenu != null && contextMenu.isVisible()) {
+        if (keyEvent.key() == InputConstants.KEY_ESCAPE && contextMenu != null && contextMenu.isVisible()) {
             contextMenu.setVisible(false);
             return true;
         }
