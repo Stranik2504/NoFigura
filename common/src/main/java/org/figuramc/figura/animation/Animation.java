@@ -31,6 +31,7 @@ public class Animation {
 
     protected final List<Map.Entry<FiguraModelPart, List<Animation.AnimationChannel>>> animationParts = new ArrayList<>();
     private final Map<Float, LuaValue> codeFrames = new HashMap<>();
+    private final Map<Float, String> codeFrameQueue = new HashMap<>();
 
     // -- player variables -- // 
 
@@ -120,8 +121,27 @@ public class Animation {
             playCode(this.lastTime, this.frameTime);
     }
 
+    private void compileCode() {
+        Iterator<Map.Entry<Float, String>> iter = codeFrameQueue.entrySet().iterator();
+
+        while (iter.hasNext()) {
+            Map.Entry<Float, String> item = iter.next();
+            LuaValue chunk = owner.loadScript("animations." + modelName + "." + name, item.getValue());
+
+            if (chunk != null) {
+                codeFrames.put(item.getKey(), chunk);
+                iter.remove();
+            }
+        }
+    }
+
     public void playCode(float minTime, float maxTime) {
-        if (owner.luaRuntime == null || codeFrames.isEmpty())
+        if (owner.luaRuntime == null)
+            return;
+
+        compileCode();
+
+        if (codeFrames.isEmpty())
             return;
 
         if (maxTime < minTime) {
@@ -275,8 +295,7 @@ public class Animation {
             value = "animation.new_code"
     )
     public Animation newCode(float time, @LuaNotNil String data) {
-        LuaValue chunk = owner.loadScript("animations." + modelName + "." + name, data);
-        codeFrames.put(Math.max(time, 0f), chunk);
+        codeFrameQueue.put(Math.max(time, 0f), data);
         return this;
     }
 
