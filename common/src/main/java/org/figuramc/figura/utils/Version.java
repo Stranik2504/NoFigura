@@ -11,7 +11,7 @@ public class Version implements Comparable<Version> {
     private static final Pattern PATTERN = Pattern.compile(
         "^"+
         // #.#.#, with the minor and patch versions being optional.
-        "(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?)?"+
+        "(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?(?:\\.(?<sub>0|[1-9]\\d*))?)?"+
         // from the -, grab all characters until the +.
         "(?:-(?<pre>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*))*))?"+
         // from the +, grab all characters until the end of the string.
@@ -21,13 +21,13 @@ public class Version implements Comparable<Version> {
 
     private final String src;
 
-    public final int major, minor, patch;
+    public final int major, minor, patch, sub;
     public final String pre, build;
     public final boolean invalid;
 
     public Version(String version) {
         // temp vars
-        int major = 0, minor = 0, patch = 0;
+        int major = 0, minor = 0, patch = 0, sub = 0;
         String pre = null, build = null;
         boolean invalid = true;
 
@@ -45,6 +45,10 @@ public class Version implements Comparable<Version> {
                 if (p != null)
                     patch = Integer.parseInt(p);
 
+                String s = matcher.group("sub");
+                if (s != null)
+                    sub = Integer.parseInt(s);
+
                 pre = matcher.group("pre");
                 build = matcher.group("build");
 
@@ -58,6 +62,7 @@ public class Version implements Comparable<Version> {
         this.major = major;
         this.minor = minor;
         this.patch = patch;
+        this.sub = sub;
         this.pre = pre == null ? "" : pre;
         this.build = build == null ? "" : build;
         this.invalid = invalid;
@@ -76,6 +81,8 @@ public class Version implements Comparable<Version> {
             ret = minor - o.minor;
         else if (patch != o.patch)
             ret = patch - o.patch;
+        else if (sub != o.sub)
+            ret = sub - o.sub;
 
         else if (pre.isBlank() && !o.pre.isBlank())
             ret = 1;
@@ -119,7 +126,7 @@ public class Version implements Comparable<Version> {
         if (invalid)
             return src;
 
-        String ver = major + "." + minor + "." + patch;
+        String ver = major + "." + minor + "." + patch + "." + sub;
         if (!pre.isBlank())
             ver += "-" + pre;
 
@@ -131,7 +138,7 @@ public class Version implements Comparable<Version> {
         if (invalid)
             return src;
 
-        String ver = major + "." + minor + "." + patch;
+        String ver = major + "." + minor + "." + patch + "." + sub;
         if (!pre.isBlank())
             ver += "-" + pre;
         if (!build.isBlank())
