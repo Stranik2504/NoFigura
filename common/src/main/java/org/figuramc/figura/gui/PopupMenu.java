@@ -92,7 +92,7 @@ public class PopupMenu {
             return;
         }
 
-        GlStateManager._disableDepthTest();
+        /*GlStateManager._disableDepthTest();*/
         Matrix3x2fStack pose = gui.pose();
         pose.pushMatrix();
 

@@ -176,7 +176,7 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
             );
 
             // hat
-            GlStateManager._enableBlend(0);
+            /*GlStateManager._enableBlend(0);*/
             guiRenderState.addBlitToCurrentLayer(
                     new BlitRenderState(
                             RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
@@ -195,7 +195,7 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
                             null
                     )
             );
-            GlStateManager._disableBlend(0);
+            /*GlStateManager._disableBlend(0);*/
         } else {
             GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(PlayerPermPackElement.UNKNOWN).getTextureView();
             GpuSampler sampler = Minecraft.getInstance().getTextureManager().getTexture(PlayerPermPackElement.UNKNOWN).getSampler();

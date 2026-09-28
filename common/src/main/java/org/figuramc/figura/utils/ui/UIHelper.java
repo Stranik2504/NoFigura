@@ -289,8 +289,8 @@ public final class UIHelper {
     }
 
     public static void enableBlend() {
-        GlStateManager._enableBlend(0);
-        GlStateManager._blendFuncSeparate(770, 771, 1, 0);
+        /*GlStateManager._enableBlend(0);
+        GlStateManager._blendFuncSeparate(770, 771, 1, 0);*/
     }
 
     public static void blit(GuiGraphicsExtractor gui, int x, int y, int width, int height, Identifier texture) {

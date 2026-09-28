@@ -162,9 +162,9 @@ public class PlayerPermPackElement extends AbstractPermPackElement {
                     gui.blit(RenderPipelines.GUI_TEXTURED, this.skin, x + 4, y + 4, 8f, 8f,32, 32, 8, 8, 64, 64);
 
                     // hat
-                    GlStateManager._enableBlend(0);
+                    /*GlStateManager._enableBlend(0);*/
                     gui.blit(RenderPipelines.GUI_TEXTURED, this.skin, x + 4, y + 4, 40f, 8f,32, 32, 8, 8, 64, 64);
-                    GlStateManager._disableBlend(0);
+                    /*GlStateManager._disableBlend(0);*/
                 } else {
                     UIHelper.blit(gui, x + 4, y + 4, 32, 32, UNKNOWN);
                 }
