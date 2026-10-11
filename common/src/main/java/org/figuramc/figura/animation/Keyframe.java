@@ -97,44 +97,46 @@ public class Keyframe implements Comparable<Keyframe> {
      */
     private KeyframeValue compile(String source, String chunkName) {
         try {
-            return KeyframeValue.literal(Double.parseDouble(source));
-        } catch (NumberFormatException fail) {
             try {
-                // Okay, so it's Lua. Try as an expression first...
-                String exprSrc = "return " + source;
-                LuaValue chunk = owner.loadScript(chunkName, exprSrc);
-                if (chunk == null) return null;
-                return KeyframeValue.function(chunk, chunkName);
-            } catch (LuaError e) { /* chunk compile failed (probably syntax) */
+                return KeyframeValue.literal(Double.parseDouble(source));
+            } catch (NumberFormatException fail) {
                 try {
-                    // Try as a statement.
-                    LuaValue chunk = owner.loadScript(chunkName, source);
+                    // Okay, so it's Lua. Try as an expression first...
+                    String exprSrc = "return " + source;
+                    LuaValue chunk = owner.loadScript(chunkName, exprSrc);
                     if (chunk == null) return null;
                     return KeyframeValue.function(chunk, chunkName);
-                } catch (LuaError e2) { /* garbage! */
-                    String trailers = "";
-                    if (part.formatVersion >= FORMAT_V5) {
-                        // try to tell the user about the issue
+                } catch (LuaError e) { /* chunk compile failed (probably syntax) */
+                    try {
+                        // Try as a statement.
+                        LuaValue chunk = owner.loadScript(chunkName, source);
+                        if (chunk == null) return null;
+                        return KeyframeValue.function(chunk, chunkName);
+                    } catch (LuaError e2) { /* garbage! */
+                        String trailers = "";
+                        if (part.formatVersion >= FORMAT_V5) {
+                            // try to tell the user about the issue
+                            //noinspection TextBlockMigration
+                            trailers = "\n\n§6If you opened a 4.12 model file in 5.0, your keyframes might be corrupted.§r\n" +
+                                    "§6You'll have to manually fix them; note that the X and Y values on rotation,§r\n" +
+                                    "§6 as well as the X value on position, need to be negated.§r";
+                        }
+                        // text blocks are java 15+ only
                         //noinspection TextBlockMigration
-                        trailers = "\n\n§6If you opened a 4.12 model file in 5.0, your keyframes might be corrupted.§r\n" +
-                                "§6You'll have to manually fix them; note that the X and Y values on rotation,§r\n" +
-                                "§6 as well as the X value on position, need to be negated.§r";
+                        throw new LuaError(String.format(
+                                "Syntax error in keyframe [%s]:\n\n" +
+                                        "Not a valid expression, because:\n%s\n" +
+                                        "Not a valid block, because:\n%s\n\n" +
+                                        "script:\n" +
+                                        "%s" +
+                                        "%s",
+                                chunkName,
+                                trimErrorMessage(e.getMessage()),
+                                trimErrorMessage(e2.getMessage()),
+                                source,
+                                trailers
+                        ));
                     }
-                    // text blocks are java 15+ only
-                    //noinspection TextBlockMigration
-                    throw new LuaError(String.format(
-                            "Syntax error in keyframe [%s]:\n\n" +
-                                    "Not a valid expression, because:\n%s\n" +
-                                    "Not a valid block, because:\n%s\n\n" +
-                                    "script:\n" +
-                                    "%s" +
-                                    "%s",
-                            chunkName,
-                            trimErrorMessage(e.getMessage()),
-                            trimErrorMessage(e2.getMessage()),
-                            source,
-                            trailers
-                    ));
                 }
             }
         } catch (Exception e3) {
