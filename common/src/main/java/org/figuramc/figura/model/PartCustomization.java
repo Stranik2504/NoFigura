@@ -389,6 +389,20 @@ public class PartCustomization {
         return GLOBAL_CUSTOMIZATION_POSE_STACK;
     }
 
+    /**
+      * Same as {@link #copyIntoGlobalPoseStack()}, but into a freshly allocated {@link PoseStack}.
+      * Use it whenever the result outlives the current call (e.g. queued render tasks / pivot boxes
+      * that are drawn later), otherwise every queued entry would alias the one shared global stack
+      * and be drawn with whatever transform was written last.
+      */
+    public PoseStack copyIntoNewPoseStack() {
+        recalculate();
+        PoseStack poseStack = new PoseStack();
+        positionMatrix.copyDataTo(poseStack.last().pose());
+        normalMatrix.copyDataTo(poseStack.last().normal());
+        return poseStack;
+    }
+
     public enum PartType {
         MESH,
         CUBE,

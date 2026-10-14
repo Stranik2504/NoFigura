@@ -42,7 +42,7 @@ public abstract class RenderTask {
     public PoseStack prepare(PartCustomization.PartCustomizationStack stack) {
         customization.recalculate();
         stack.push(customization);
-        PoseStack poseStack = stack.peek().copyIntoGlobalPoseStack();
+        PoseStack poseStack = stack.peek().copyIntoNewPoseStack();
         stack.pop();
 
         return poseStack;

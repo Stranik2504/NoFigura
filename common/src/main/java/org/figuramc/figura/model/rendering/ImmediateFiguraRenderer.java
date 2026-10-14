@@ -497,7 +497,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
         double boxSize = group ? 1 / 16d : 1 / 32d;
         boxSize /= Math.max(Math.cbrt(part.savedPartToWorldMat.det()), 0.02);
 
-        PoseStack poseStack = customization.copyIntoGlobalPoseStack();
+        PoseStack poseStack = customization.copyIntoNewPoseStack();
 
         queuedPivotBoxes.add(new FiguraSubmission.QueuedPivotBox(poseStack.last(),
                 -boxSize, -boxSize, -boxSize,

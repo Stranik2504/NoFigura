@@ -243,7 +243,7 @@ public class Avatar {
             }
 
             loaded = true;
-            Minecraft.getInstance().levelExtractor.allChanged();
+            Minecraft.getInstance().execute(() -> Minecraft.getInstance().levelExtractor.allChanged());
         });
     }
 
@@ -890,7 +890,7 @@ public class Avatar {
         return ret;
     }
 
-    public boolean renderArrow(PoseStack stack, FiguraVertexConsumerProvider bufferProvider, float delta, int light) {
+    public boolean renderArrow(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
         if (renderer == null || !loaded)
             return false;
 
@@ -901,9 +901,9 @@ public class Avatar {
         stack.rotate(quaternionf);
 
         renderer.setupRenderer(
-            PartFilterScheme.ARROW, bufferProvider, stack,
+            PartFilterScheme.ARROW, collector, stack,
             delta, light, 1f, OverlayTexture.NO_OVERLAY,
-            false, false
+            false, false, outlineColor
         );
 
         int comp = renderer.renderSpecialParts();
@@ -912,7 +912,7 @@ public class Avatar {
         return comp > 0;
     }
 
-    public boolean renderTrident(PoseStack stack, FiguraVertexConsumerProvider bufferProvider, float delta, int light) {
+    public boolean renderTrident(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
         if (renderer == null || !loaded)
             return false;
 
@@ -923,9 +923,9 @@ public class Avatar {
         stack.rotate(quaternionf);
 
         renderer.setupRenderer(
-            PartFilterScheme.TRIDENT, bufferProvider, stack,
+            PartFilterScheme.TRIDENT, collector, stack,
             delta, light, 1f, OverlayTexture.NO_OVERLAY,
-            false, false
+            false, false, outlineColor
         );
 
         int comp = renderer.renderSpecialParts();
