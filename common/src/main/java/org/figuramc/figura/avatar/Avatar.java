@@ -544,6 +544,9 @@ public class Avatar {
         renderer.yaw = yaw;
         renderer.entity = entity;
 
+        for (var pivotQueue : renderer.pivotCustomizations.values())
+            pivotQueue.clear();
+
         renderer.setupRenderer(
                 filter, bufferSource, stack,
                 delta, light, alpha, overlay,
@@ -561,7 +564,9 @@ public class Avatar {
         renderMode = mode;
         boolean update = prevRenderMode != EntityRenderMode.OTHER || renderMode == EntityRenderMode.FIRST_PERSON_WORLD;
 
-        renderer.pivotCustomizations.values().clear();
+        for (var pivotQueue : renderer.pivotCustomizations.values())
+            pivotQueue.clear();
+
         renderer.allowMatrixUpdate = renderer.updateLight = update;
         renderer.entity = entity;
 
@@ -929,6 +934,10 @@ public class Avatar {
     }
 
     public static final boolean HAS_IRIS = PlatformUtils.isModLoaded("iris") || PlatformUtils.isModLoaded("oculus");
+    public static SubmitNodeCollector pivotSubmitCollector;
+    public static EntityRenderState pivotSubmitState;
+    public static Avatar pivotSubmitAvatar;
+
     public synchronized boolean pivotPartRender(ParentType parent, Consumer<PoseStack> consumer) {
         if (renderer == null || !loaded || !parent.isPivot)
             return false;
@@ -939,6 +948,27 @@ public class Avatar {
         Queue<Pair<FiguraMat4, FiguraMat3>> queue = renderer.pivotCustomizations.get(parent);
         if (queue == null || queue.isEmpty())
             return false;
+
+        if (pivotSubmitAvatar == this && pivotSubmitCollector instanceof NodeCollectorExtension extension) {
+            extension.submitFiguraModel(this, pivotSubmitState, (avatar, state, bufferSource) -> {
+                avatar.pivotPartRenderNow(parent, consumer);
+                return null;
+            });
+
+            return true;
+        }
+
+        return pivotPartRenderNow(parent, consumer);
+    }
+
+    private synchronized boolean pivotPartRenderNow(ParentType parent, Consumer<PoseStack> consumer) {
+        if (renderer == null || !loaded)
+            return false;
+
+        Queue<Pair<FiguraMat4, FiguraMat3>> queue = renderer.pivotCustomizations.get(parent);
+        if (queue == null || queue.isEmpty())
+            return false;
+
 
         Pair<FiguraMat4, FiguraMat3> matrixPair = queue.peek(); // первая (самая ранняя) запись за кадр
 
