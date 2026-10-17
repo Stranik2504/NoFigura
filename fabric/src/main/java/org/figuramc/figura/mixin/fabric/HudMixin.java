@@ -29,13 +29,7 @@ public abstract class HudMixin {
 
     @Inject(at = @At("HEAD"), method = "extractRenderState", cancellable = true)
     private void onRender(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        FiguraGui.onRender(graphics, deltaTracker.getGameTimeDeltaPartialTick(false), ci);
-    }
-
-    @Inject(at = @At("RETURN"), method = "extractRenderState")
-    private void afterRender(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!AvatarManager.panic)
-            FiguraGui.renderOverlays(graphics);
+        FiguraGui.onRender(graphics, deltaTracker.getGameTimeDeltaPartialTick(false), ci, false);
     }
 
     @Inject(at = @At("HEAD"), method = "extractCrosshair", cancellable = true)

@@ -12,6 +12,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class FiguraGui {
 
     public static void onRender(GuiGraphicsExtractor guiGraphics, float tickDelta, CallbackInfo ci) {
+        onRender(guiGraphics, tickDelta, ci, true);
+    }
+
+    public static void onRender(GuiGraphicsExtractor guiGraphics, float tickDelta, CallbackInfo ci, boolean renderOverlays) {
         if (AvatarManager.panic)
             return;
 
@@ -32,7 +36,9 @@ public class FiguraGui {
             ((GuiGraphicsExtractorAccessor) guiGraphics).figura$getRenderState().addPicturesInPictureState(state);
 
             if (avatar.luaRuntime != null && !avatar.luaRuntime.renderer.renderHUD) {
-                renderOverlays(guiGraphics);
+                if (renderOverlays)
+                    renderOverlays(guiGraphics);
+
                 ci.cancel();
             }
         }
