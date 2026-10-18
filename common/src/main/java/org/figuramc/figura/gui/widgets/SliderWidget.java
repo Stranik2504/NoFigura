@@ -1,5 +1,6 @@
 package org.figuramc.figura.gui.widgets;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -47,8 +48,14 @@ public class SliderWidget extends ScrollBarWidget {
         if (!this.isActive()) return false;
 
         int keyCode = keyEvent.key();
-        if (keyCode > 261 && keyCode < 266) {
-            scroll(stepSize * (keyCode % 2 == 0 ? 1 : -1) * Math.max(keyEvent.modifiers() * 10, 1) * (getWidth() - headWidth + 2d));
+        int direction = switch (keyCode) {
+            case InputConstants.KEY_RIGHT, InputConstants.KEY_DOWN -> 1;
+            case InputConstants.KEY_LEFT, InputConstants.KEY_UP -> -1;
+            default -> 0;
+        };
+
+        if (direction != 0) {
+            scroll(stepSize * direction * Math.max(keyEvent.modifiers() * 10, 1) * (getWidth() - headWidth + 2d));
             return true;
         }
 
