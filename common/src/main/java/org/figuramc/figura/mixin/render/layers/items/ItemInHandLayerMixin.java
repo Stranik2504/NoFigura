@@ -76,7 +76,15 @@ public abstract class ItemInHandLayerMixin<S extends ArmedEntityRenderState, M e
             }
 
             // sorta have to do this manually otherwise itemRenderEvent isn't called
-            itemStackRenderState.submit(stack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, state.outlineColor);
+            FiguraItemStackRenderStateExtension ext = (FiguraItemStackRenderStateExtension) itemStackRenderState;
+            ItemTransform transform = ext.figura$getItemTransform();
+
+            if (!av.itemRenderEvent(ItemStackAPI.verify(ext.figura$getItemStack()),
+                    ext.figura$getDisplayContext().name(), FiguraVec3.fromVec3f(transform.translation()),
+                    FiguraVec3.of(transform.rotation().z(), transform.rotation().y(), transform.rotation().x()), FiguraVec3.fromVec3f(transform.scale()),
+                    ext.figura$isLeftHanded(), stack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY)
+            )
+                itemStackRenderState.submit(stack, submitNodeCollector, light, OverlayTexture.NO_OVERLAY, state.outlineColor);
         })) {
             ci.cancel();
         }

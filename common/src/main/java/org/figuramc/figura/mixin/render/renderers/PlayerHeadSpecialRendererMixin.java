@@ -13,6 +13,7 @@ import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraSkullAvatarAssociationExtension;
+import org.figuramc.figura.ducks.SkullAvatarLookup;
 import org.figuramc.figura.permissions.Permissions;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,11 +33,18 @@ public abstract class PlayerHeadSpecialRendererMixin {
     @Inject(method = "submit(Lnet/minecraft/client/renderer/PlayerSkinRenderCache$RenderInfo;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IIZI)V", at = @At("HEAD"))
     private void captureAvatar(PlayerSkinRenderCache.RenderInfo playerHeadRenderInfo, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, int j, boolean bl, int k, CallbackInfo ci) {
         if (playerHeadRenderInfo == null) {
+            SkullAvatarLookup.setPendingSpecial(null);
             return;
         }
         // copy the avatar from the playerHeadRenderInfo into the inner renderType()
         // possibly redundant, see PlayerHeadRenderInfoMixin for implementation details
         Avatar avatar = ((FiguraSkullAvatarAssociationExtension)(Object)playerHeadRenderInfo).figura$getAvatar();
         ((FiguraSkullAvatarAssociationExtension)playerHeadRenderInfo.renderType()).figura$setAvatar(avatar);
+        SkullAvatarLookup.setPendingSpecial(avatar);
+    }
+
+    @Inject(method = "submit(Lnet/minecraft/client/renderer/PlayerSkinRenderCache$RenderInfo;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;IIZI)V", at = @At("RETURN"))
+    private void figura$clearPendingAvatar(PlayerSkinRenderCache.RenderInfo playerHeadRenderInfo, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, int j, boolean bl, int k, CallbackInfo ci) {
+        SkullAvatarLookup.clearPendingSpecial();
     }
 }

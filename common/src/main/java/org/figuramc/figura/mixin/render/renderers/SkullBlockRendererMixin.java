@@ -50,7 +50,7 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
     @Inject(at = @At("HEAD"), method = "submitSkull", cancellable = true)
     private static void renderSkull(float animationProgress, PoseStack stack, SubmitNodeCollector submitNodeCollector, int light, SkullModelBase model, RenderType renderType, int outlineColor, ModelFeatureRenderer.CrumblingOverlay crumblingOverlay, CallbackInfo ci) {
         // retrieve avatar stored in RenderType
-        Avatar localAvatar = ((FiguraSkullAvatarAssociationExtension)renderType).figura$getAvatar();
+        Avatar renderTypeAvatar = ((FiguraSkullAvatarAssociationExtension)renderType).figura$getAvatar();
         // avatar = null;
 
         // parse block and items first, so we can yeet them in case of a missed event
@@ -66,6 +66,8 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
 
         SkullBlockRendererAccessor.SkullRenderMode localMode = SkullBlockRendererAccessor.getRenderMode();
         SkullBlockRendererAccessor.setRenderMode(SkullBlockRendererAccessor.SkullRenderMode.OTHER);
+
+        Avatar localAvatar = SkullAvatarLookup.resolve(localBlock, localItem, renderTypeAvatar);
 
         // NOTE(luavixen): setting avatar=null was already here, so i'm leaving it to avoid breaking things
         //                 possibly remove later??

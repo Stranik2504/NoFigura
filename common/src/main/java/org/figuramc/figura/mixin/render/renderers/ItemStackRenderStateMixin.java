@@ -2,7 +2,6 @@ package org.figuramc.figura.mixin.render.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.geometry.ItemQuads;
@@ -10,6 +9,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraItemStackRenderStateExtension;
@@ -40,6 +40,34 @@ public class ItemStackRenderStateMixin implements FiguraItemStackRenderStateExte
     private final List<BiFunction<VertexConsumer, PoseStack, Boolean>> figura$preRenderingCallback = new ArrayList<>();
     @Unique
     private final List<Runnable> figura$postRenderingCallback = new ArrayList<>();
+
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;III)V", at = @At("HEAD"), cancellable = true)
+    private void figura$itemRenderEvent(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, int overlayCoords, int outlineColor, CallbackInfo ci) {
+        if (figura$itemStack == null || figura$itemStack.isEmpty() || displayContext == null)
+            return;
+
+        switch (displayContext) {
+            case THIRD_PERSON_LEFT_HAND, THIRD_PERSON_RIGHT_HAND, HEAD -> { return; }
+            default -> { }
+        }
+
+        if (AvatarManager.panic)
+            return;
+
+        Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+        if (avatar == null)
+            return;
+
+        ItemTransform transform = figura$getItemTransform();
+
+        if (avatar.itemRenderEvent(ItemStackAPI.verify(figura$itemStack), displayContext.name(),
+            FiguraVec3.fromVec3f(transform.translation()),
+            FiguraVec3.of(transform.rotation().z(), transform.rotation().y(), transform.rotation().x()),
+            FiguraVec3.fromVec3f(transform.scale()), displayContext.leftHand(),
+            poseStack, submitNodeCollector, lightCoords, overlayCoords)
+        )
+            ci.cancel();
+    }
 
     @Override
     public void figura$setItemStack(@Nullable ItemStack itemStack) {

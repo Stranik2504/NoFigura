@@ -26,6 +26,7 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.mixin.render.PoseStackAccessor;
 import org.figuramc.figura.utils.RenderUtils;
+import org.joml.Matrix4fStack;
 import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
@@ -102,6 +103,10 @@ public class LevelRendererMixinFabric {
                 ? gameRenderer.hud3DTarget.getDepthTextureView()
                 : mainTarget.getDepthTextureView();
 
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.mul(cameraState.viewRotationMatrix);
+
         try (
                 FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
                 RenderPass pass = RenderSystem.getDevice()
@@ -112,6 +117,8 @@ public class LevelRendererMixinFabric {
         ) {
             RenderSystem.bindDefaultUniforms(pass);
             FeatureRenderDispatcher.renderAllFeatures(pass, frame);
+        } finally {
+            modelViewStack.popMatrix();
         }
 
         Avatar.firstPerson = false;

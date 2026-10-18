@@ -19,6 +19,7 @@ import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.GameRendererAccessor;
+import org.figuramc.figura.gui.FiguraHudRenderer;
 import org.figuramc.figura.gui.FiguraPortraitRenderer;
 import org.figuramc.figura.lua.api.ClientAPI;
 import org.figuramc.figura.utils.RenderUtils;
@@ -77,6 +78,7 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
     private List<PictureInPictureRenderer<?>> addPortraitRenderer(List<PictureInPictureRenderer<?>> list) {
         List<PictureInPictureRenderer<?>> newList = new ArrayList<>(list);
         newList.add(new FiguraPortraitRenderer());
+        newList.add(new FiguraHudRenderer());
         return newList;
     }
 

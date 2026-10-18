@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraSkullAvatarAssociationExtension;
+import org.figuramc.figura.ducks.SkullAvatarLookup;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,5 +30,15 @@ public class BlockEntityRenderDispatcherMixin {
         if (!(renderer instanceof FiguraSkullAvatarAssociationExtension figuraSkullAvatarAssociationExtension)) return;
 
         figuraSkullAvatarAssociationExtension.figura$setAvatar(avatar);
+    }
+
+    @Inject(method = "tryExtractRenderState", at = @At("RETURN"))
+    private <E extends BlockEntity, S extends BlockEntityRenderState> void figura$tagSkullState(E blockEntity, float partialTicks, ModelFeatureRenderer.@Nullable CrumblingOverlay breakProgress, boolean isGloballyRendered, CallbackInfoReturnable<S> cir) {
+        S state = cir.getReturnValue();
+
+        if (state == null || !(blockEntity instanceof SkullBlockEntity skullBlockEntity))
+            return;
+
+        SkullAvatarLookup.putBlock(state, SkullAvatarLookup.fromProfile(skullBlockEntity.getOwnerProfile()));
     }
 }
