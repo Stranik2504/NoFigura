@@ -3,6 +3,7 @@ package org.figuramc.figura.mixin.fabric;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
@@ -24,6 +25,7 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.mixin.render.PoseStackAccessor;
 import org.figuramc.figura.utils.RenderUtils;
+import org.joml.Matrix4fStack;
 import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
@@ -90,8 +92,13 @@ public class LevelRendererMixinFabric {
             } while (((PoseStackAccessor) stack).getLastIndex() > lastIndex);
         }
 
+        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        modelViewStack.pushMatrix();
+        modelViewStack.mul(cameraState.viewRotationMatrix);
+
         featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
 
+        modelViewStack.popMatrix();
         Avatar.firstPerson = false;
     }
 }

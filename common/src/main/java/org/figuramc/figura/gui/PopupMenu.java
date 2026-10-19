@@ -101,7 +101,7 @@ public class PopupMenu {
         worldPos.add(0f, entity.getBbHeight() + 0.1f, 0f);
 
         FiguraVec4 vec = MathUtils.worldToScreenSpace(worldPos);
-        if (vec.z < 1) return; // too close
+        if (vec.z < 1) { pose.popMatrix(); return; } // too close
 
         Window window = minecraft.getWindow();
         double w = window.getGuiScaledWidth();

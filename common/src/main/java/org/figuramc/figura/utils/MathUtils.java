@@ -1,5 +1,6 @@
 package org.figuramc.figura.utils;
 
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
@@ -98,9 +99,9 @@ public class MathUtils {
         transformMatrix.transform(camSpace);
 
         Vector4f projectiveCamSpace = new Vector4f(camSpace, 1f);
-        CameraRenderState cameraRenderState = new CameraRenderState();
-        camera.extractRenderState(cameraRenderState, minecraft.getDeltaTracker().getGameTimeDeltaPartialTick(false));
-        Matrix4f projMat = new Matrix4f(cameraRenderState.projectionMatrix);
+        Window window = minecraft.getWindow();
+        float aspect = window.getWidth() / (float) Math.max(window.getHeight(), 1);
+        Matrix4f projMat = new Matrix4f().perspective((float) Math.toRadians(camera.getFov()), aspect, 0.05f, 1024f);
         projMat.transform(projectiveCamSpace);
         float w = projectiveCamSpace.w();
 

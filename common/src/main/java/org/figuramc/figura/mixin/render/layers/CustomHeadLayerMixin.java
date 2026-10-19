@@ -3,6 +3,7 @@ package org.figuramc.figura.mixin.render.layers;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
@@ -84,7 +85,7 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
             if (avatar.pivotPartRender(ParentType.HelmetItemPivot, stack -> {
                 float s = 19f;
                 stack.scale(s, s, s);
-                stack.translate(-0.5d, 0d, -0.5d);
+                stack.mulPose(Axis.ZP.rotationDegrees(180f));
 
                 // set item context
                 SkullBlockRendererAccessor.setItem(itemStack);
@@ -103,9 +104,9 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
             stack.scale(s, s, s);
             ItemTransform transform = ((FiguraItemStackRenderStateExtension) itemStackState).figura$getItemTransform();
 
-            boolean shouldSubmitVanilla = avatar.itemRenderEvent(ItemStackAPI.verify(((FiguraItemStackRenderStateExtension)itemStackState).figura$getItemStack()), ((FiguraItemStackRenderStateExtension)itemStackState).figura$getDisplayContext().name(), FiguraVec3.fromVec3f(transform.translation()), FiguraVec3.of(transform.rotation().z(), transform.rotation().y(), transform.rotation().x()), FiguraVec3.fromVec3f(transform.scale()), ((FiguraItemStackRenderStateExtension) itemStackState).figura$isLeftHanded(), stack, submitNodeCollector, entityState.lightCoords, OverlayTexture.NO_OVERLAY);
-            if (shouldSubmitVanilla)
-                entityState.headItem.submit(poseStack, submitNodeCollector, i, OverlayTexture.NO_OVERLAY, entityState.outlineColor);
+            boolean handled = avatar.itemRenderEvent(ItemStackAPI.verify(((FiguraItemStackRenderStateExtension)itemStackState).figura$getItemStack()), ((FiguraItemStackRenderStateExtension)itemStackState).figura$getDisplayContext().name(), FiguraVec3.fromVec3f(transform.translation()), FiguraVec3.of(transform.rotation().z(), transform.rotation().y(), transform.rotation().x()), FiguraVec3.fromVec3f(transform.scale()), ((FiguraItemStackRenderStateExtension) itemStackState).figura$isLeftHanded(), stack, submitNodeCollector, entityState.lightCoords, OverlayTexture.NO_OVERLAY);
+            if (!handled)
+                entityState.headItem.submit(stack, submitNodeCollector, i, OverlayTexture.NO_OVERLAY, entityState.outlineColor);
         })) {
             ci.cancel();
         }
