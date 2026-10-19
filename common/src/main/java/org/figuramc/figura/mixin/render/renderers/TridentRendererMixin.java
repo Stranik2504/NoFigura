@@ -58,25 +58,22 @@ public abstract class TridentRendererMixin<T extends ThrownTrident, S extends Th
         if (avatar == null || avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) == 0)
             return;
 
-        FiguraSubmitCallBackExtension figura$submitCallback = (FiguraSubmitCallBackExtension) model;
+        FiguraMod.pushProfiler(FiguraMod.MOD_ID);
+        FiguraMod.pushProfiler(avatar);
+        FiguraMod.pushProfiler("tridentRender");
 
-        figura$submitCallback.figura$addPreRenderingCallback((bufferSource, poseStack) -> {
-            FiguraMod.pushProfiler(FiguraMod.MOD_ID);
-            FiguraMod.pushProfiler(avatar);
-            FiguraMod.pushProfiler("tridentRender");
+        FiguraMod.pushProfiler("event");
+        boolean cancelled = avatar.tridentRenderEvent(tickDelta, EntityAPI.wrap(trident));
 
-            FiguraMod.pushProfiler("event");
-            boolean bool = avatar.tridentRenderEvent(tickDelta, EntityAPI.wrap(trident));
+        FiguraMod.popPushProfiler("render");
+        boolean rendered = avatar.renderTrident(pose, submitNodeCollector, tickDelta, thrownTridentRenderState.lightCoords, thrownTridentRenderState.outlineColor);
 
-            FiguraMod.popPushProfiler("render");
-            if (bool || avatar.renderTrident(poseStack, renderType -> bufferSource, tickDelta, thrownTridentRenderState.lightCoords)) {
-                poseStack.popPose();
-                return false;
-            }
+        FiguraMod.popProfiler(4);
 
-            FiguraMod.popProfiler(4);
-            return true;
-        });
+        if (cancelled || rendered) {
+            FiguraSubmitCallBackExtension figura$submitCallback = (FiguraSubmitCallBackExtension) model;
+            figura$submitCallback.figura$addPreRenderingCallback((bufferSource, poseStack) -> false);
+        }
     }
 
     @Inject(at = @At("HEAD"), method = "extractRenderState(Lnet/minecraft/world/entity/projectile/arrow/ThrownTrident;Lnet/minecraft/client/renderer/entity/state/ThrownTridentRenderState;F)V")

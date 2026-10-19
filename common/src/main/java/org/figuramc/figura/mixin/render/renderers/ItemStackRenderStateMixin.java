@@ -2,17 +2,27 @@ package org.figuramc.figura.mixin.render.renderers;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.cuboid.ItemTransform;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraItemStackRenderStateExtension;
 import org.figuramc.figura.ducks.FiguraSubmitCallBackExtension;
+import org.figuramc.figura.lua.api.world.ItemStackAPI;
+import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.utils.RenderUtils;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +81,35 @@ public class ItemStackRenderStateMixin implements FiguraItemStackRenderStateExte
     @Override
     public void figura$addPreRenderingCallback(BiFunction<VertexConsumer, PoseStack, Boolean> callback) {
         this.figura$preRenderingCallback.add(callback);
+    }
+
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;III)V", at = @At("HEAD"), cancellable = true)
+    private void figura$firstPersonItemEvent(PoseStack poseStack, SubmitNodeCollector collector, int light, int overlay, int outlineColor, CallbackInfo ci) {
+        if (!RenderUtils.firstPersonItemPass || RenderUtils.firstPersonItemEventActive)
+            return;
+
+        if (displayContext != ItemDisplayContext.FIRST_PERSON_LEFT_HAND && displayContext != ItemDisplayContext.FIRST_PERSON_RIGHT_HAND)
+            return;
+
+        var player = Minecraft.getInstance().player;
+        Avatar avatar = player == null ? null : AvatarManager.getAvatarForPlayer(player.getUUID());
+
+        if (avatar == null)
+            return;
+
+        ItemTransform transform = figura$getItemTransform();
+        RenderUtils.firstPersonItemEventActive = true;
+
+        try {
+            if (avatar.itemRenderEvent(ItemStackAPI.verify(figura$itemStack), displayContext.name(),
+                    FiguraVec3.fromVec3f(transform.translation()), FiguraVec3.of(transform.rotation().z(), transform.rotation().y(), transform.rotation().x()),
+                    FiguraVec3.fromVec3f(transform.scale()), displayContext.leftHand(),
+                    poseStack, collector, light, overlay)
+            )
+                ci.cancel();
+        } finally {
+            RenderUtils.firstPersonItemEventActive = false;
+        }
     }
 
     @Override

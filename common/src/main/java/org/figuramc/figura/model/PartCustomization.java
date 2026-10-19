@@ -389,6 +389,14 @@ public class PartCustomization {
         return GLOBAL_CUSTOMIZATION_POSE_STACK;
     }
 
+    public PoseStack copyIntoNewPoseStack() {
+        recalculate();
+        PoseStack poseStack = new PoseStack();
+        positionMatrix.copyDataTo(poseStack.last().pose());
+        normalMatrix.copyDataTo(poseStack.last().normal());
+        return poseStack;
+    }
+
     public enum PartType {
         MESH,
         CUBE,
