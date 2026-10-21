@@ -979,13 +979,6 @@ public class Avatar {
         if (queue == null || queue.isEmpty())
             return false;
 
-        if (FiguraMod.ticks % 10 == 0) { // TEMP DEBUG
-            int dbgI = 0;
-
-            for (var dbgEntry : queue)
-                FiguraMod.LOGGER.info("[pivot-debug] NOW parent={} mode={} entry#{}/{} matrix={}", parent, renderMode, dbgI++, queue.size(), dbgEntry.getFirst());
-        }
-
         Pair<FiguraMat4, FiguraMat3> matrixPair = queue.peek(); // первая (самая ранняя) запись за кадр
 
         PartCustomization customization = new PartCustomization();

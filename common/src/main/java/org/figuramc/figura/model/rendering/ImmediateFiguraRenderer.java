@@ -469,7 +469,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
         double boxSize = group ? 1 / 16d : 1 / 32d;
         boxSize /= Math.max(Math.cbrt(part.savedPartToWorldMat.det()), 0.02);
 
-        PoseStack stack = customization.copyIntoGlobalPoseStack();
+        PoseStack stack = customization.copyIntoNewPoseStack();
 
         renderLineBox(stack.last(), bufferSource.getBuffer(RenderTypes.LINES),
                 -boxSize, -boxSize, -boxSize,

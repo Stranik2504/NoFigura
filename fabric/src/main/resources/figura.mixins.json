@@ -1,18 +1,19 @@
 {
-  "required": true,
-  "package": "org.figuramc.figura.mixin.fabric",
-  "compatibilityLevel": "JAVA_25",
-  "minVersion": "0.8",
-  "client": [
-    "CommandSuggestionsMixinFabric",
-    "ElytraLayerAccessor",
-    "GuiMixin",
-    "HumanoidArmorLayerMixinFabric",
-    "LevelRendererMixinFabric"
-  ],
-  "mixins": [
-  ],
-  "injectors": {
-    "defaultRequire": 1
+    "required": true,
+    "package": "org.figuramc.figura.mixin.fabric",
+    "compatibilityLevel": "JAVA_25",
+    "minVersion": "0.8",
+    "client": [
+        "CommandSuggestionsMixinFabric",
+        "ElytraLayerAccessor",
+        "GameRendererGuiMixin",
+        "GuiMixin",
+        "HumanoidArmorLayerMixinFabric",
+        "LevelRendererMixinFabric"
+    ],
+    "mixins": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
   }
 }

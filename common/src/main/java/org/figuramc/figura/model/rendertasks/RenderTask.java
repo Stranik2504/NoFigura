@@ -41,7 +41,7 @@ public abstract class RenderTask {
     public void render(PartCustomization.PartCustomizationStack stack, MultiBufferSource buffer, int light, int overlay) {
         customization.recalculate();
         stack.push(customization);
-        PoseStack poseStack = stack.peek().copyIntoGlobalPoseStack();
+        PoseStack poseStack = stack.peek().copyIntoNewPoseStack();
         render(poseStack, buffer, light, overlay);
         stack.pop();
     }
