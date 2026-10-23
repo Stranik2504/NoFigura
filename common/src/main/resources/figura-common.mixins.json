@@ -118,6 +118,7 @@
     "render.renderers.AbstractSignRendererMixin",
     "render.renderers.ArrowRendererMixin",
     "render.renderers.ArrowRenderStateMixin",
+    "render.renderers.BlockEntityRenderDispatcherMixin",
     "render.renderers.BlockEntityRenderStateAccessor",
     "render.renderers.BlockEntityWithoutLevelRendererMixin",
     "render.renderers.EntityRenderDispatcherMixin",
