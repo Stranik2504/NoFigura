@@ -514,6 +514,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
         FiguraMat3 currentNormalMat = customization.getNormalMatrix();
         ConcurrentLinkedQueue<Pair<FiguraMat4, FiguraMat3>> queue = pivotCustomizations.computeIfAbsent(parentType, p -> new ConcurrentLinkedQueue<>());
         queue.add(new Pair<>(currentPosMat, currentNormalMat)); // These are COPIES, so ok to add
+        pivotLastSeen.put(parentType, FiguraMod.ticks);
     }
 
     protected FiguraMat4 partToWorldMatrices(PartCustomization cust) {

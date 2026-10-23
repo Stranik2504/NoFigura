@@ -946,10 +946,18 @@ public class Avatar {
             return false;
 
         Queue<Pair<FiguraMat4, FiguraMat3>> queue = renderer.pivotCustomizations.get(parent);
-        if (queue == null || queue.isEmpty())
-            return false;
+        boolean deferrable = pivotSubmitAvatar == this && pivotSubmitCollector instanceof NodeCollectorExtension;
+        if (deferrable) {
+            Integer seen = renderer.pivotLastSeen.get(parent);
 
-        if (pivotSubmitAvatar == this && pivotSubmitCollector instanceof NodeCollectorExtension extension) {
+            if (seen == null || FiguraMod.ticks - seen > 40)
+                return false;
+        } else if (queue == null || queue.isEmpty()) {
+            return false;
+        }
+
+        if (deferrable) {
+            NodeCollectorExtension extension = (NodeCollectorExtension) pivotSubmitCollector;
             extension.submitFiguraModel(this, pivotSubmitState, (avatar, state, bufferSource) -> {
                 avatar.pivotPartRenderNow(parent, consumer);
                 return null;

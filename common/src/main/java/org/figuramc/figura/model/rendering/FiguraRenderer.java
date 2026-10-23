@@ -62,6 +62,7 @@ public abstract class FiguraRenderer {
 
     public PartFilterScheme currentFilterScheme;
     public final HashMap<ParentType, ConcurrentLinkedQueue<Pair<FiguraMat4, FiguraMat3>>> pivotCustomizations = new HashMap<>(ParentType.values().length);
+    public final Map<ParentType, Integer> pivotLastSeen = new ConcurrentHashMap<>();
     protected final List<FiguraTextureSet> textureSets = new ArrayList<>();
     public final HashMap<String, FiguraTexture> textures = new HashMap<>();
     public final HashMap<String, FiguraTexture> customTextures = new HashMap<>();
