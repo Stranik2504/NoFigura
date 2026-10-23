@@ -72,16 +72,7 @@ public enum FiguraRenderTypes {
         return id == null || func == null ? null : func.apply(id);
     }
 
-    public static class FiguraRenderType {
-        public static final RenderType SOLID = FiguraRenderTypeFactory.create(
-                "figura_solid",
-                RenderSetup.builder(FiguraRenderPipelines.FIGURA_SOLID).bufferSize(256)
-                        .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
-                        .setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET)
-                        .setOutline(RenderSetup.OutlineProperty.NONE)
-                        .createRenderSetup()
-        );
-
+    private static class FiguraRenderType {
         private static final BiFunction<Identifier, Boolean, RenderType> CUTOUT_EMISSIVE_SOLID = Util.memoize(
                 (texture, affectsOutline) ->
                         FiguraRenderTypeFactory.create("figura_cutout_emissive_solid",
