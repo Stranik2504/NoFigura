@@ -21,6 +21,10 @@ public class FiguraGui {
     private static final ProjectionMatrixBuffer guiProjectionMatrixBuffer = new ProjectionMatrixBuffer("gui");
 
     public static void onRender(GuiGraphicsExtractor guiGraphics, float tickDelta, CallbackInfo ci) {
+        onRender(guiGraphics, tickDelta, ci, true);
+    }
+
+    public static void onRender(GuiGraphicsExtractor guiGraphics, float tickDelta, CallbackInfo ci, boolean renderOverlays) {
         if (AvatarManager.panic)
             return;
 
@@ -60,7 +64,8 @@ public class FiguraGui {
             // hud hidden by script
             if (avatar.luaRuntime != null && !avatar.luaRuntime.renderer.renderHUD) {
                 // render figura overlays
-                renderOverlays(guiGraphics);
+                if (renderOverlays)
+                    renderOverlays(guiGraphics);
                 // cancel this method
                 ci.cancel();
             }

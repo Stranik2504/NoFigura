@@ -106,7 +106,6 @@ public class BlockbenchParser2 {
             for (BlockbenchCommonTypes.Texture texture : textures) {
                 TextureRepresentation texRep = new TextureRepresentation(texture);
                 texRep.localID = i++;
-                this.textures.add(texRep);
                 // assign the same global index as others with the same name, or
                 // add a new index
                 textureNames.compute(
@@ -121,6 +120,7 @@ public class BlockbenchParser2 {
                             return v;
                         }
                 );
+                this.textures.add(texRep);
             }
         }
 
