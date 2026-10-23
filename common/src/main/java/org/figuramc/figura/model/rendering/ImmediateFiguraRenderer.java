@@ -480,7 +480,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
                 (float) color.x, (float) color.y, (float) color.z, 1f);
 
         if (bufferSource instanceof MultiBufferSource.BufferSource bs) {
-            bs.endLastBatch();
+            bs.endBatch(RenderTypes.lines());
         }
     }
 

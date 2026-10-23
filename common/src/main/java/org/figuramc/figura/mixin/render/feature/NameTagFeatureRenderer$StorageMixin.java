@@ -138,9 +138,10 @@ public class NameTagFeatureRenderer$StorageMixin implements NameTagFeatureRender
 
 
     @WrapOperation(method = "add",
-            at = @At(value = "INVOKE", target =
-                    "Ljava/util/List;add(Ljava/lang/Object;)Z"
-            , ordinal = 1))
+            at = {
+                    @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1),
+                    @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 2)
+            })
     private <E> boolean drawWithColor(List<E> instance, E e, Operation<Boolean> original) {
         SubmitNodeStorage.NameTagSubmit submit = (SubmitNodeStorage.NameTagSubmit) e;
 
