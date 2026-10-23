@@ -560,7 +560,6 @@ public class BlockbenchCommonTypes {
                     CompoundTag kfTag = new CompoundTag();
                     kfTag.putFloat("time", kf3.time);
                     kfTag.putString("int", kf3.interpolation != null ? kf3.interpolation : "linear");
-                    Keyframe.Keyframe3.Data pre = kf3.data_points[0];
 
                     FiguraVec3 trans;
                     boolean transX = isV5 && (kf3.channel.equals("rotation") || kf3.channel.equals("position"));
@@ -571,6 +570,7 @@ public class BlockbenchCommonTypes {
                         default -> trans = DO_NOTHING;
                     }
 
+                    Keyframe.Keyframe3.Data pre = kf3.data_points[0];
                     kfTag.put("pre", pre.toNBT(kf3.channel, transX, transY));
                     if (kf3.data_points.length > 1) {
                         Keyframe.Keyframe3.Data post = kf3.data_points[1];

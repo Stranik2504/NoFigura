@@ -1004,6 +1004,7 @@ public class Avatar {
         FiguraMod.pushProfiler(this);
         FiguraMod.pushProfiler("updateMatrices");
 
+        renderer.pivotCustomizations.values().forEach(Queue::clear);
         renderer.vanillaModelData.update(entityModel);
         renderer.currentFilterScheme = PartFilterScheme.MODEL;
         renderer.setMatrices(stack);
