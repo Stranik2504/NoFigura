@@ -9,14 +9,14 @@ public class Version implements Comparable<Version> {
     // difference only is that build metadata can be anything
     // also minor and patch are optionals
     private static final Pattern PATTERN = Pattern.compile(
-        "^"+
-        // #.#.#, with the minor and patch versions being optional.
-        "(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?(?:\\.(?<sub>0|[1-9]\\d*))?)?"+
-        // from the -, grab all characters until the +.
-        "(?:-(?<pre>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*))*))?"+
-        // from the +, grab all characters until the end of the string.
-        "(?:\\+(?<build>[\\da-zA-Z-]+(?:\\.[\\da-zA-Z-]+)*))?"+
-        "$"
+            "^"+
+                    // #.#.#.#, with the minor and patch and sub versions being optional.
+                    "(?<major>0|[1-9]\\d*)(?:\\.(?<minor>0|[1-9]\\d*)(?:\\.(?<patch>0|[1-9]\\d*))?(?:\\.(?<sub>0|[1-9]\\d*))?)?"+
+                    // from the -, grab all characters until the +.
+                    "(?:-(?<pre>(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][\\da-zA-Z-]*))*))?"+
+                    // from the +, grab all characters until the end of the string.
+                    "(?:\\+(?<build>[\\da-zA-Z-]+(?:\\.[\\da-zA-Z-]+)*))?"+
+                    "$"
     );
 
     private final String src;
@@ -83,7 +83,6 @@ public class Version implements Comparable<Version> {
             ret = patch - o.patch;
         else if (sub != o.sub)
             ret = sub - o.sub;
-
         else if (pre.isBlank() && !o.pre.isBlank())
             ret = 1;
         else if (!pre.isBlank() && o.pre.isBlank())
