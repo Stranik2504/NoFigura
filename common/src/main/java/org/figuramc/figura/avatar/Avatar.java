@@ -875,6 +875,17 @@ public class Avatar {
         return comp > 0;
     }
 
+    public boolean hasTridentParts() {
+        if (renderer == null || !loaded)
+            return false;
+
+        PartFilterScheme previous = renderer.currentFilterScheme;
+        renderer.currentFilterScheme = PartFilterScheme.TRIDENT;
+        int complexity = renderer.getComplexity();
+        renderer.currentFilterScheme = previous;
+        return complexity > 0;
+    }
+
     public boolean renderTrident(PoseStack stack, MultiBufferSource bufferSource, float delta, int light) {
         if (renderer == null || !loaded)
             return false;
