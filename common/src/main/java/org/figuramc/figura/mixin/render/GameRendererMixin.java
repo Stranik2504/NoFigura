@@ -118,14 +118,6 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         hasShaders = ClientAPI.hasShaderPack();
     }
 
-    @ModifyArg(method = "renderLevel", index = 0,
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-    private CameraRenderState renderLevelBobHurt(CameraRenderState cameraRenderState) {
-        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
-        return cameraRenderState;
-    }
-
     @ModifyArg(method = "<init>", index = 4,
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/render/GuiRenderer;<init>(Lnet/minecraft/client/renderer/state/gui/GuiRenderState;Lnet/minecraft/client/renderer/MultiBufferSource$BufferSource;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/feature/FeatureRenderDispatcher;Ljava/util/List;)V"))
@@ -134,25 +126,6 @@ public abstract class GameRendererMixin implements GameRendererAccessor {
         newList.add(new FiguraPortraitRenderer(source));
         return newList;
     }
-
-    @WrapOperation(method = "renderLevel",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/GameRenderer;bobHurt(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-    private void figura$stopBobView(GameRenderer instance, CameraRenderState cameraRenderState, PoseStack stack, Operation<GameRenderer> original) {
-        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
-        if (!RenderUtils.vanillaModelAndScript(avatar) || hasShaders)
-            original.call(instance, cameraRenderState, stack);
-    }
-
-    @WrapOperation(method = "renderLevel",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/renderer/GameRenderer;bobView(Lnet/minecraft/client/renderer/state/level/CameraRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
-    private void figura$stopBobHurt(GameRenderer instance, CameraRenderState cameraRenderState, PoseStack stack, Operation<GameRenderer> original) {
-        Avatar avatar = AvatarManager.getAvatar(this.minecraft.getCameraEntity() == null ? this.minecraft.player : this.minecraft.getCameraEntity());
-        if (!RenderUtils.vanillaModelAndScript(avatar) || hasShaders)
-            original.call(instance, cameraRenderState, stack);
-    }
-
 
     @ModifyExpressionValue(method = "renderLevel",
             at = @At(value = "FIELD",
