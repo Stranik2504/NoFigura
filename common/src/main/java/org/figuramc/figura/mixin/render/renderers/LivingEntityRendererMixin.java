@@ -85,6 +85,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             return;
 
         lastPose = poseStack.last().pose();
+        Avatar.pivotSubmitAvatar = currentAvatar;
+        Avatar.pivotSubmitCollector = submitNodeCollector;
+        Avatar.pivotSubmitState = livingEntityRenderState;
     }
 
     @ModifyArg(
@@ -195,6 +198,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
             localAvatar.updateMatrices(model, poseStack);
             currentAvatar = null;
             lastPose = null;
+            Avatar.pivotSubmitAvatar = null;
+            Avatar.pivotSubmitCollector = null;
+            Avatar.pivotSubmitState = null;
             poseStack.popPose();
             ci.cancel();
             return;
@@ -267,6 +273,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
         currentAvatar = null;
         lastPose = null;
+        Avatar.pivotSubmitAvatar = null;
+        Avatar.pivotSubmitCollector = null;
+        Avatar.pivotSubmitState = null;
     }
 
     @Inject(method = "shouldShowName(Lnet/minecraft/world/entity/LivingEntity;D)Z", at = @At("HEAD"), cancellable = true)
