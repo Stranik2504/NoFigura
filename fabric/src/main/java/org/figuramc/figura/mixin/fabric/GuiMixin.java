@@ -27,13 +27,7 @@ public class GuiMixin {
 
     @Inject(at = @At("HEAD"), method = "render", cancellable = true)
     private void onRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        FiguraGui.onRender(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false), ci);
-    }
-
-    @Inject(at = @At("RETURN"), method = "render")
-    private void afterRender(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (!AvatarManager.panic)
-            FiguraGui.renderOverlays(guiGraphics);
+        FiguraGui.onRender(guiGraphics, deltaTracker.getGameTimeDeltaPartialTick(false), ci, false);
     }
 
     @Inject(at = @At("HEAD"), method = "renderCrosshair", cancellable = true)

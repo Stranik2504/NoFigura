@@ -43,6 +43,9 @@ import java.util.function.BiFunction;
 
 public class RenderUtils {
 
+    public static boolean firstPersonItemPass = false;
+    public static boolean firstPersonItemEventActive = false;
+
     public static boolean vanillaModel(Avatar avatar) {
         return avatar != null && avatar.permissions.get(Permissions.VANILLA_MODEL_EDIT) >= 1;
     }

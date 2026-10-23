@@ -2,7 +2,6 @@ package org.figuramc.figura.gui;
 
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
-import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -13,7 +12,6 @@ import net.minecraft.world.entity.Entity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
-import org.joml.Matrix4f;
 import org.joml.Matrix4fStack;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -21,6 +19,10 @@ public class FiguraGui {
     private static final CachedOrthoProjectionMatrixBuffer guiProjectionMatrixBuffer = new CachedOrthoProjectionMatrixBuffer("gui", 1000.0F, 11000.0F, true);
 
     public static void onRender(GuiGraphics guiGraphics, float tickDelta, CallbackInfo ci) {
+        onRender(guiGraphics, tickDelta, ci, true);
+    }
+
+    public static void onRender(GuiGraphics guiGraphics, float tickDelta, CallbackInfo ci, boolean renderOverlays) {
         if (AvatarManager.panic)
             return;
 
