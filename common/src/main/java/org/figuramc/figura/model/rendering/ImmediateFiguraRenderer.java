@@ -240,7 +240,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
         FiguraMod.pushProfiler("predicate");
         Boolean thisPassedPredicate = currentFilterScheme.test(part.parentType, prevPredicate);
         if (thisPassedPredicate == null || (!custom.visible)) {
-            if (part.parentType.isRenderLayer)
+            if (part.parentType.isRenderLayer && currentFilterScheme == PartFilterScheme.MODEL)
                 part.savedCustomization = customizationStack.peek();
             FiguraMod.popProfiler(2);
             return true;

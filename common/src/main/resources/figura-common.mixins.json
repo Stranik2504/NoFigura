@@ -142,5 +142,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "render.renderers.BlockEntityRenderDispatcherMixin"
+  ]
 }
