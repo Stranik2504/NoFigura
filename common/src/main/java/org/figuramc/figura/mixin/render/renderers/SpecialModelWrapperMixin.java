@@ -22,10 +22,8 @@ public class SpecialModelWrapperMixin<T> {
     @Shadow @Final private SpecialModelRenderer<T> specialRenderer;
 
     @Inject(method = "update", at = @At(value = "RETURN"))
-    public void update(CallbackInfo ci, @Local(argsOnly = true) ItemStackRenderState layerRenderState, @Local(argsOnly = true)ItemStack stack) {
-        ResolvableProfile profile = stack.get(DataComponents.PROFILE);
-        Avatar avatar = (profile != null && profile.partialProfile() != null) ? AvatarManager.getAvatarForPlayer(profile.partialProfile().id()) : null;
-        if (avatar != null && specialRenderer instanceof PlayerHeadSpecialRenderer)
-            layerRenderState.setAnimated();
+    public void update(CallbackInfo ci, @Local(argsOnly = true) ItemStackRenderState output) {
+        if (specialRenderer instanceof PlayerHeadSpecialRenderer)
+            output.setAnimated();
     }
 }
