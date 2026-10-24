@@ -8,6 +8,9 @@ import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.figuramc.figura.FiguraMod;
+import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraItemRendererExtension;
 import org.figuramc.figura.ducks.FiguraItemStackRenderStateExtension;
 import org.figuramc.figura.lua.api.world.WorldAPI;
@@ -25,6 +28,13 @@ public class ItemModelResolverMixin implements FiguraItemRendererExtension {
     @Inject(method = "updateForTopItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/item/ItemModelResolver;appendItemLayers(Lnet/minecraft/client/renderer/item/ItemStackRenderState;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/entity/ItemOwner;I)V"))
     private void injectItemStack(ItemStackRenderState itemStackRenderState, ItemStack itemStack, ItemDisplayContext itemDisplayContext, Level level, ItemOwner itemOwner, int i, CallbackInfo ci) {
         ((FiguraItemStackRenderStateExtension)itemStackRenderState).figura$setItemStack(itemStack);
+
+        if (itemDisplayContext == ItemDisplayContext.GUI) {
+            Avatar avatar = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
+
+            if (avatar != null && avatar.luaRuntime != null && avatar.luaRuntime.events != null && avatar.luaRuntime.events.ITEM_RENDER.__len() > 0)
+                itemStackRenderState.setAnimated();
+        }
     }
     
     @Unique

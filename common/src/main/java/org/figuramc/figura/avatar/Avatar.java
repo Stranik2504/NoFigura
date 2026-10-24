@@ -60,10 +60,7 @@ import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.model.FiguraVertexConsumerProvider;
 import org.figuramc.figura.model.ParentType;
 import org.figuramc.figura.model.PartCustomization;
-import org.figuramc.figura.model.rendering.FiguraRenderer;
-import org.figuramc.figura.model.rendering.EntityRenderMode;
-import org.figuramc.figura.model.rendering.ImmediateFiguraRenderer;
-import org.figuramc.figura.model.rendering.PartFilterScheme;
+import org.figuramc.figura.model.rendering.*;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.permissions.PermissionManager;
 import org.figuramc.figura.permissions.PermissionPack;
@@ -446,12 +443,50 @@ public class Avatar {
                 boolean renderedPart = figuraItemRendered(modelPart);
                 rendered |= renderedPart;
                 if (renderedPart) {
+                    copy.pushPose();
+                    if ("GUI".equals(mode))
+                        fitItemIntoSlot(copy, modelPart);
+
                     renderItem(copy, nodeCollector, modelPart, light, overlay); // синхронно, без буфера
+                    copy.popPose();
                 }
             }
 
         }
         return rendered;
+    }
+
+    private static void fitItemIntoSlot(PoseStack stack, FiguraModelPart part) {
+        float[] b = {Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE, -Float.MAX_VALUE};
+        collectItemBounds(part, b);
+        if (b[0] > b[3])
+            return; // no geometry
+
+        float dx = b[3] - b[0], dy = b[4] - b[1];
+        boolean tilt = dy >= dx * 1.5f;
+        float extent = tilt ? (dx + dy) * 0.70710678f : Math.max(dx, dy);
+
+        if (!tilt && extent <= 16f)
+            return;
+
+        float s = tilt ? Math.min(1f, 15f / extent) : 14f / extent;
+        if (tilt)
+            stack.rotateDegrees(Axis.ZP, -45f);
+
+        stack.scale(s, s, s);
+        stack.translate(-(b[0] + b[3]) / 32f, -(b[1] + b[4]) / 32f, -(b[2] + b[5]) / 32f);
+    }
+
+    private static void collectItemBounds(FiguraModelPart part, float[] b) {
+        for (List<Vertex> list : part.vertices.values()) {
+            for (Vertex v : list) {
+                b[0] = Math.min(b[0], v.x); b[1] = Math.min(b[1], v.y); b[2] = Math.min(b[2], v.z);
+                b[3] = Math.max(b[3], v.x); b[4] = Math.max(b[4], v.y); b[5] = Math.max(b[5], v.z);
+            }
+        }
+
+        for (FiguraModelPart child : part.children)
+            collectItemBounds(child, b);
     }
 
     public boolean playSoundEvent(String id, FiguraVec3 pos, float vol, float pitch, boolean loop, String category, String file) {

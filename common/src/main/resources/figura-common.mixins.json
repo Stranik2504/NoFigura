@@ -122,7 +122,6 @@
     "render.renderers.EntityRendererMixin",
     "render.renderers.EntityRenderStateMixin",
     "render.renderers.FirstPersonHandsAndItemsMixin",
-    "render.renderers.HandRenderSelectionAccessor",
     "render.renderers.ItemInHandRendererMixin",
     "render.renderers.ItemModelResolverMixin",
     "render.renderers.ItemStackRenderState$LayerRenderStateAccessor",
