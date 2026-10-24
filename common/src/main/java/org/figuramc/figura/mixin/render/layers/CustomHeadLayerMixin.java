@@ -4,7 +4,6 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
@@ -91,7 +90,7 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
             if (avatar.pivotPartRender(ParentType.HelmetItemPivot, stack -> {
                 float s = 19f;
                 stack.scale(s, s, s);
-                stack.mulPose(Axis.ZP.rotationDegrees(180f));
+                stack.translate(-0.5d, 0d, -0.5d);
 
                 // set item context
                 SkullBlockRendererAccessor.setItem(itemStack);
