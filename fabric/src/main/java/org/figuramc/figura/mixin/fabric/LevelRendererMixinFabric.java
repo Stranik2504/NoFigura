@@ -41,7 +41,7 @@ public class LevelRendererMixinFabric {
     @Shadow @Final private SubmitNodeStorage submitNodeStorage;
     @Shadow @Final private FeatureRenderDispatcher featureRenderDispatcher;
 
-    @Inject(method = "render", at = @At("RETURN"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;submitFeatures(Lnet/minecraft/client/renderer/state/level/LevelRenderState;Lnet/minecraft/client/renderer/SubmitNodeCollector;Z)V"))
     private void renderLevelFirstPerson(GraphicsResourceAllocator resourceAllocator, DeltaTracker deltaTracker, boolean renderOutline, CameraRenderState cameraState, Matrix4fc modelViewMatrix, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         Camera camera = minecraft.gameRenderer.mainCamera();
@@ -90,15 +90,17 @@ public class LevelRendererMixinFabric {
             do {
                 stack.popPose();
             } while (((PoseStackAccessor) stack).getLastIndex() > lastIndex);
+
+            Avatar.firstPerson = false;
         }
 
-        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
+        /*Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
         modelViewStack.pushMatrix();
         modelViewStack.mul(cameraState.viewRotationMatrix);
 
         featureRenderDispatcher.renderAllFeatures(this.submitNodeStorage);
 
         modelViewStack.popMatrix();
-        Avatar.firstPerson = false;
+        Avatar.firstPerson = false;*/
     }
 }
