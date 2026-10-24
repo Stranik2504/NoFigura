@@ -1,5 +1,6 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
+    id "com.vanniktech.maven.publish" version "0.34.0"
 }
 
 architectury {
@@ -117,33 +118,44 @@ components.java {
     }
 }
 
-publishing {
-    publications {
-        maven(MavenPublication) {
-            artifactId = "${project.archivesBaseName}-${project.name}"
-            version = project.version
-            artifact(remapJar) {
-                builtBy remapJar
-                classifier ''
-            }
-            artifact(sourcesJar) {
-                builtBy sourcesJar
-                classifier 'sources'
+mavenPublishing {
+    publishToMavenCentral()
+    signAllPublications()
+
+    coordinates(
+            "dev.stranik",
+            "nofigura-${project.name}",
+            "${rootProject.mod_version}-${rootProject.minecraft_version}"
+    )
+
+    pom {
+        name = "NoFigura"
+        description = "Figura port for Minecraft 1.21.x / 26.x (Fabric)"
+        inceptionYear = "2025"
+        url = "https://github.com/Stranik2504/NoFigura"
+        licenses {
+            license {
+                name = "PolyForm Noncommercial License 1.0.0"
+                url = "https://polyformproject.org/licenses/noncommercial/1.0.0"
             }
         }
+        developers {
+            developer {
+                id = "stranik2504"
+                name = "Stranik2504"
+                url = "https://github.com/Stranik2504"
+            }
+        }
+        scm {
+            url = "https://github.com/Stranik2504/NoFigura"
+            connection = "scm:git:git://github.com/Stranik2504/NoFigura.git"
+            developerConnection = "scm:git:ssh://git@github.com/Stranik2504/NoFigura.git"
+        }
     }
-    setupRepositories(repositories)
 }
 
-void setupRepositories(RepositoryHandler repositories) {
-    if (project.hasProperty("mavenUrl")) {
-        repositories.maven {
-            name = "figuraMaven"
-            url project.mavenUrl
-            credentials(PasswordCredentials)
-            authentication {
-                basic(BasicAuthentication)
-            }
-        }
-    }
+// Central требует javadoc-jar, а на коде с Minecraft javadoc часто падает
+tasks.withType(Javadoc).configureEach {
+    failOnError = false
+    options.addStringOption("Xdoclint:none", "-quiet")
 }
