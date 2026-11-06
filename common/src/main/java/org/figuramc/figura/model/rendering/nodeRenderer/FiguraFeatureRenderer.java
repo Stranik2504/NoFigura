@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.feature.RenderTypeFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.figuramc.figura.model.rendering.ImmediateFiguraRenderer;
+import org.figuramc.figura.model.rendertasks.TextTask;
 import org.figuramc.figura.utils.HudRenderContext;
 import org.jspecify.annotations.NonNull;
 
@@ -29,7 +30,7 @@ public class FiguraFeatureRenderer extends RenderTypeFeatureRenderer<FiguraSubmi
             }
 
             for (FiguraSubmission.QueuedRenderTask qt : submit.renderTasks()) {
-                boolean hudText = HudRenderContext.isHudPass();
+                boolean hudText = HudRenderContext.isHudPass() && qt.task() instanceof TextTask;
                 if (hudText)
                     HudRenderContext.beginTextPass();
                 try {

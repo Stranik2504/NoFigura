@@ -15,7 +15,7 @@ public class PreparedRenderTypeMixin {
     @ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true, index = 2)
     private static RenderPipeline figura$hudTextNoDepth(RenderPipeline pipeline) {
         String path = pipeline.getLocation().getPath();
-        boolean text = HudRenderContext.isTextPass() && path.contains("text");
+        boolean text = HudRenderContext.isTextPass();
         boolean emissiveOverlay = HudRenderContext.isHudPass()
                 && (path.contains("beacon") || path.contains("eyes") || path.contains("emissive"));
 
