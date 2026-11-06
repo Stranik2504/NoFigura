@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.feature.RenderTypeFeatureRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import org.figuramc.figura.model.rendering.ImmediateFiguraRenderer;
+import org.figuramc.figura.utils.HudRenderContext;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
@@ -28,7 +29,15 @@ public class FiguraFeatureRenderer extends RenderTypeFeatureRenderer<FiguraSubmi
             }
 
             for (FiguraSubmission.QueuedRenderTask qt : submit.renderTasks()) {
-                qt.task().render(qt.poseStack(), this::getVertexBuilder, qt.light(), qt.overlay());
+                boolean hudText = HudRenderContext.isHudPass();
+                if (hudText)
+                    HudRenderContext.beginTextPass();
+                try {
+                    qt.task().render(qt.poseStack(), this::getVertexBuilder, qt.light(), qt.overlay());
+                } finally {
+                    if (hudText)
+                        HudRenderContext.endTextPass();
+                }
             }
 
             for (FiguraSubmission.QueuedPivotBox qb : submit.pivotBoxes()) {

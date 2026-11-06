@@ -64,7 +64,7 @@ public class TextTask extends RenderTask {
         Font font = Minecraft.getInstance().font;
         int l = this.customization.light != null ? this.customization.light : light;
         int bg = backgroundColor != null ? ColorUtils.intRGBAToIntARGB(backgroundColor) : background ? (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25f) * 0xFF) << 24 : 0;
-        int out = outlineColor != null ? outlineColor : 0x202020;
+        int out = (outlineColor != null ? outlineColor : 0x202020) | 0xFF000000;
         int op = opacity << 24 | 0xFFFFFF;
         Font.DisplayMode displayMode = seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET;
         float vertexOffset = outline ? FiguraMod.VERTEX_OFFSET : 0f;
@@ -73,6 +73,14 @@ public class TextTask extends RenderTask {
             @Override
             public void acceptRenderable(TextRenderable renderable) {
                 VertexConsumer vc = buffer.getBuffer(renderable.renderType(displayMode));
+                renderable.render(matrix, vc, l, false);
+            }
+        };
+
+        Font.GlyphVisitor outlineVisitor = new Font.GlyphVisitor() {
+            @Override
+            public void acceptRenderable(TextRenderable renderable) {
+                VertexConsumer vc = buffer.getBuffer(renderable.renderType(Font.DisplayMode.NORMAL));
                 renderable.render(matrix, vc, l, false);
             }
         };
@@ -95,13 +103,14 @@ public class TextTask extends RenderTask {
             if (outline) {
                 Font.PreparedText outlinePrepared = font.prepare8xTextOutline(text.getVisualOrderText(), x, j, out);
 
-                outlinePrepared.visit(visitor);
+                outlinePrepared.visit(outlineVisitor);
 
-                if (seeThrough) {
-                    Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
+                // 1.21.4's drawInBatch8xOutline drew the outline AND the filled text.
+                // The 26.3 port only visited the outline, so outlined text (all of this
+                // avatar's names/K.O.) had glyphs but no visible fill.
+                Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
 
-                    prepared.visit(visitor);
-                }
+                prepared.visit(visitor);
             } else {
                 Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
 
