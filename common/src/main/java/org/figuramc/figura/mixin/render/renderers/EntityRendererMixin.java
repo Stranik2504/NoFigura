@@ -68,7 +68,13 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
 
     @Inject(at = @At("HEAD"), method = "extractRenderState")
     private void extractRenderState(T entity, S entityRenderState, float f, CallbackInfo ci) {
-        ((FiguraEntityRenderStateExtension) entityRenderState).figura$setEntityId(entity.getId());
+        try {
+            ((FiguraEntityRenderStateExtension) entityRenderState).figura$setEntityId(entity.getId());
+        } catch (IllegalStateException ignored) {
+            // 26.3 throws for client-side entities that were never added to a level
+            // (for example EntityTask renders). Leave the state ID unset; consumers
+            // already treat a null ID as "not a world entity".
+        }
         ((FiguraEntityRenderStateExtension) entityRenderState).figura$setTickDelta(f);
     }
 

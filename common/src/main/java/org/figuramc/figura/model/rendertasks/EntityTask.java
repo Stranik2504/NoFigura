@@ -9,7 +9,9 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.world.entity.*;
@@ -30,6 +32,7 @@ import org.joml.Quaternionf;
 import org.luaj.vm2.LuaError;
 
 import java.util.OptionalInt;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -37,6 +40,9 @@ import java.util.OptionalInt;
         value = "entity_task"
 )
 public class EntityTask extends RenderTask {
+
+    /** Negative IDs are reserved for client-side EntityTask entities; 26.3's getId() throws for 0. */
+    private static final AtomicInteger FAKE_ENTITY_ID = new AtomicInteger(-1);
 
     @Nullable Entity entity;
     long ticksSinceEntity;
@@ -142,11 +148,24 @@ public class EntityTask extends RenderTask {
                 finalNbt.put("id", StringTag.valueOf(nbtOrId));
             }
 
+            // Block-attached entities (paintings/item frames) need a valid block
+            // position and facing on 26.3; their old 1.21.4 defaults are not enough.
+            if (!finalNbt.contains("block_pos"))
+                finalNbt.put("block_pos", new IntArrayTag(new int[]{0, 0, 0}));
+            if (!finalNbt.contains("facing"))
+                finalNbt.putByte("facing", (byte) Direction.SOUTH.get2DDataValue());
+
             assert Minecraft.getInstance().level != null;
             entity = EntityType.loadEntityRecursive(finalNbt, Minecraft.getInstance().level, new EntitySpawnRequest(EntitySpawnReason.SPAWN_ITEM_USE, true), EntityProcessor.NOP);
             if (entity == null) {
                 throw new LuaError("Could not create entity");
             }
+
+            // 26.3's Entity.getId() throws when the entity was never added to a
+            // level. EntityTasks render client-side entities, so assign each one a
+            // unique negative ID; world lookups for it simply return null.
+            entity.setId(FAKE_ENTITY_ID.getAndDecrement());
+
             ticksSinceEntity = Minecraft.getInstance().level.getGameTime() - entity.tickCount;
         } catch (CommandSyntaxException e) {
             throw new LuaError(e.getMessage());
