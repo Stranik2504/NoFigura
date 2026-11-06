@@ -29,6 +29,7 @@ import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
 import org.figuramc.figura.model.rendertasks.RenderTask;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.FiguraSubmitUtils;
+import org.figuramc.figura.utils.HudRenderContext;
 import org.figuramc.figura.utils.ui.UIHelper;
 
 import java.util.*;
@@ -42,6 +43,14 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
     public static final FiguraMat4 CAMERA_POS_TO_WORLD_MATRIX = FiguraMat4.of();
 
     private static final PartCustomization pivotOffsetter = new PartCustomization();
+
+    /**
+     * Legacy HUD models use very large |z| values as a draw-order sentinel
+     * (e.g. ex_skill_frame.Frame at z=-1000), while normal UI/3D parts stay
+     * around z=-29..+4. The threshold is expressed in model units; the HUD
+     * renderer stores the current guiScale*state.scale() in HudRenderContext.
+     */
+    private static final double HUD_OVERLAY_Z_THRESHOLD = 500.0;
 
     protected VertexBuffer vertexBuffer;
     private final List<FiguraSubmission.QueuedRenderTask> queuedRenderTasks = new ArrayList<>();
@@ -197,8 +206,14 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             // push vertices to vertex consumer
             FiguraMod.pushProfiler("draw");
             if (currentSubmitNodeCollector != null) {
+                // Upstream 1.21.x consumes these LinkedHashMap batches in insertion order
+                // directly into MultiBufferSource. Map.copyOf() has unspecified iteration
+                // order, which breaks HUD draw order once depth testing is flattened
+                // (e.g. the paperdoll head base covering its face overlay). Preserve the
+                // insertion order across the 26.3 SubmitNode snapshot.
                 FiguraSubmission submission = new FiguraSubmission(
-                        Map.copyOf(vertexBuffer.primaryBuffers), Map.copyOf(vertexBuffer.secondaryBuffers),
+                        Collections.unmodifiableMap(new LinkedHashMap<>(vertexBuffer.primaryBuffers)),
+                        Collections.unmodifiableMap(new LinkedHashMap<>(vertexBuffer.secondaryBuffers)),
                         List.copyOf(queuedRenderTasks), List.copyOf(queuedPivotBoxes), outlineColor
                 );
                 this.lastSubmission = submission;
@@ -694,6 +709,17 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
 
                 pos.set(vertex.x, vertex.y, vertex.z, 1);
                 pos.transform(customization.positionMatrix);
+                // HUD effect parts such as ex_skill_frame.Frame use a huge negative z
+                // (z=-1000) while their particles are at z=0. In the old HUD path depth
+                // testing was disabled, so draw order decided; with the 26.3 PIP depth
+                // buffer that raw z makes the Frame occlude the particles. Flatten only
+                // these outlier-z HUD vertices so they share depth and blend in draw
+                // order, while normal HUD parts (head z~=+/-4, bars z~=-29) keep real
+                // depth and remain correctly self-occluding. Compare in model units so
+                // high GUI scale cannot make the bars cross the threshold.
+                if (currentFilterScheme == PartFilterScheme.HUD
+                        && Math.abs(pos.z) > HUD_OVERLAY_Z_THRESHOLD * HudRenderContext.scale())
+                    pos.z = 0.0;
                 pos.add(pos.normalized().scale(vertexData.vertexOffset));
                 normal.set(vertex.nx, vertex.ny, vertex.nz);
                 normal.transform(customization.normalMatrix);
