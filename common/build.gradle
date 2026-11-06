@@ -35,6 +35,11 @@ dependencies {
 
     // Test compile only is used to mount sources on an IDE without overriding vanilla classes with Optifine's
     testCompileOnly fileTree(dir: "$rootProject.projectDir/libs", include: '*.jar')
+    // Pure-logic compatibility tests; no Minecraft bootstrap needed.
+    testImplementation platform("org.junit:junit-bom:5.10.2")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
 
     // Mods
     compileOnly "maven.modrinth:iris:$iris"
@@ -72,3 +77,6 @@ void setupRepositories(RepositoryHandler repositories) {
     }
 }
 
+test {
+    useJUnitPlatform()
+}

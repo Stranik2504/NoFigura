@@ -11,7 +11,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -37,6 +36,7 @@ import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec3;
 import org.figuramc.figura.mixin.BlockBehaviourAccessor;
+import org.figuramc.figura.utils.VanillaCompat;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.LuaUtils;
 import org.luaj.vm2.LuaTable;
@@ -65,8 +65,7 @@ public class BlockStateAPI {
         this.pos = pos;
         this.id = BuiltInRegistries.BLOCK.getKey(blockstate.getBlock()).toString();
 
-        CompoundTag tag = NbtUtils.writeBlockState(blockstate);
-        this.properties = new ReadOnlyLuaTable(tag.contains("Properties") ? NbtToLua.convert(tag.get("Properties")) : new LuaTable());
+        this.properties = new ReadOnlyLuaTable(NbtToLua.convert(VanillaCompat.Blocks.properties(blockstate)));
     }
 
     protected BlockPos getBlockPos() {
