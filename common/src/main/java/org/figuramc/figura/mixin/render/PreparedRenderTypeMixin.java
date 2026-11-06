@@ -14,17 +14,18 @@ public class PreparedRenderTypeMixin {
 
     @ModifyVariable(method = "<init>", at = @At("HEAD"), argsOnly = true, index = 2)
     private static RenderPipeline figura$hudTextNoDepth(RenderPipeline pipeline) {
-        if (!HudRenderContext.isTextPass())
-            return pipeline;
-
         String path = pipeline.getLocation().getPath();
-        if (!path.contains("text"))
+        boolean text = HudRenderContext.isTextPass() && path.contains("text");
+        boolean emissiveOverlay = HudRenderContext.isHudPass()
+                && (path.contains("beacon") || path.contains("eyes") || path.contains("emissive"));
+
+        if (!text && !emissiveOverlay)
             return pipeline;
 
         try {
-            return HudRenderPipelines.noDepth(pipeline);
+            return text ? HudRenderPipelines.noDepth(pipeline) : HudRenderPipelines.noCull(pipeline);
         } catch (Throwable throwable) {
-            FiguraMod.LOGGER.error("[HUD] failed to create no-depth text pipeline, falling back", throwable);
+            FiguraMod.LOGGER.error("[HUD] failed to create overlay pipeline, falling back", throwable);
             return pipeline;
         }
     }
