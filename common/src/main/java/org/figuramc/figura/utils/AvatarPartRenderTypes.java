@@ -9,7 +9,10 @@ import net.minecraft.util.LightCoordsUtil;
 import org.figuramc.figura.model.PartCustomization;
 import org.figuramc.figura.model.rendering.texture.FiguraRenderTypes;
 
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,7 +42,14 @@ public final class AvatarPartRenderTypes {
     private static final Map<Identifier, RenderType> FLAT_TRANSLUCENT = new ConcurrentHashMap<>();
     private static final Map<Identifier, RenderType> FLAT_TRANSLUCENT_CULL = new ConcurrentHashMap<>();
 
+    /** Identity set of every RenderType created here, used to keep them out of the emissive-last ordering. */
+    private static final Set<RenderType> VARIANTS = Collections.newSetFromMap(new IdentityHashMap<>());
+
     private AvatarPartRenderTypes() {
+    }
+
+    public static boolean isVariant(RenderType type) {
+        return type != null && VARIANTS.contains(type);
     }
 
     public static boolean isFullbright(PartCustomization customization) {
@@ -98,6 +108,7 @@ public final class AvatarPartRenderTypes {
         if (sort)
             builder.sortOnUpload();
         RenderType type = RenderType.create(name, builder.createRenderSetup());
+        VARIANTS.add(type);
         return type;
     }
 
@@ -127,6 +138,7 @@ public final class AvatarPartRenderTypes {
         if (sort)
             builder.sortOnUpload();
         RenderType type = RenderType.create(name, builder.createRenderSetup());
+        VARIANTS.add(type);
         return type;
     }
 }

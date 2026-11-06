@@ -31,6 +31,7 @@ import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.FiguraSubmitUtils;
 import org.figuramc.figura.utils.AvatarPartRenderTypes;
 import org.figuramc.figura.utils.HudRenderContext;
+import org.figuramc.figura.utils.RenderPipelineUtils;
 import org.figuramc.figura.utils.WorldRenderContext;
 import org.figuramc.figura.utils.ui.UIHelper;
 
@@ -216,17 +217,21 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
                 // order, which breaks HUD draw order once depth testing is flattened
                 // (e.g. the paperdoll head base covering its face overlay). Preserve the
                 // insertion order across the 26.3 SubmitNode snapshot.
+                // Emissive/glow overlays must draw after the opaque/translucent body.
+                // Variant render types (flat/fullbright) get inserted at the position
+                // of their first use, which can be after an ex-skill glow part and
+                // cover it; moving emissive types last restores the upstream order.
                 FiguraSubmission submission = new FiguraSubmission(
-                        Collections.unmodifiableMap(new LinkedHashMap<>(vertexBuffer.primaryBuffers)),
-                        Collections.unmodifiableMap(new LinkedHashMap<>(vertexBuffer.secondaryBuffers)),
+                        Collections.unmodifiableMap(orderEmissiveLast(vertexBuffer.primaryBuffers)),
+                        Collections.unmodifiableMap(orderEmissiveLast(vertexBuffer.secondaryBuffers)),
                         List.copyOf(queuedRenderTasks), List.copyOf(queuedPivotBoxes), outlineColor
                 );
                 this.lastSubmission = submission;
                 FiguraSubmitUtils.submit(currentSubmitNodeCollector, submission);
             } else if (currentVertexConsumerProvider != null) {
                 // немедленный режим — пишем вершины прямо сейчас
-                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, vertexBuffer.primaryBuffers);
-                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, vertexBuffer.secondaryBuffers);
+                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, orderEmissiveLast(vertexBuffer.primaryBuffers));
+                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, orderEmissiveLast(vertexBuffer.secondaryBuffers));
                 for (var qt : queuedRenderTasks)
                     qt.task().render(qt.poseStack(), currentVertexConsumerProvider, qt.light(), qt.overlay());
                 // pivot-боксы в этом режиме, скорее всего, не нужны (debug-фича) — пропускаем
@@ -717,6 +722,28 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
         }
 
         return ret;
+    }
+
+    private static LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> orderEmissiveLast(
+            Map<RenderType, List<Consumer<VertexConsumer>>> buffers) {
+        LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> normal = new LinkedHashMap<>();
+        LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> emissive = new LinkedHashMap<>();
+        for (var entry : buffers.entrySet()) {
+            if (isEmissive(entry.getKey()))
+                emissive.put(entry.getKey(), entry.getValue());
+            else
+                normal.put(entry.getKey(), entry.getValue());
+        }
+        normal.putAll(emissive);
+        return normal;
+    }
+
+    private static boolean isEmissive(RenderType type) {
+        // Our own fullbright variants also carry EMISSIVE (they are unlit), but they
+        // are not glow overlays; exclude them by identity, not by name.
+        if (type == null || AvatarPartRenderTypes.isVariant(type))
+            return false;
+        return RenderPipelineUtils.isEmissive(type.pipeline());
     }
 
     private static boolean isSingleFace(FiguraModelPart part) {
