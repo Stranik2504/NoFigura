@@ -24,6 +24,7 @@ import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.mixin.LivingEntityAccessor;
 import org.figuramc.figura.model.FiguraModelPart;
 import org.figuramc.figura.model.FiguraVertexConsumerProvider;
+import org.figuramc.figura.utils.VanillaCompat;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -142,11 +143,21 @@ public class EntityTask extends RenderTask {
                 finalNbt.put("id", StringTag.valueOf(nbtOrId));
             }
 
+            // Block-attached entities (paintings/item frames) need a valid
+            // block position and facing on 26.3.
+            VanillaCompat.Entities.addBlockAttachedDefaults(finalNbt);
+
             assert Minecraft.getInstance().level != null;
             entity = EntityType.loadEntityRecursive(finalNbt, Minecraft.getInstance().level, new EntitySpawnRequest(EntitySpawnReason.SPAWN_ITEM_USE, true), EntityProcessor.NOP);
             if (entity == null) {
                 throw new LuaError("Could not create entity");
             }
+
+            // 26.3's Entity.getId() throws when the entity was never added to a
+            // level. EntityTasks render client-side entities, so give each one a
+            // unique negative ID; world lookups for it simply return null.
+            entity.setId(VanillaCompat.Entities.nextFakeEntityId());
+
             ticksSinceEntity = Minecraft.getInstance().level.getGameTime() - entity.tickCount;
         } catch (CommandSyntaxException e) {
             throw new LuaError(e.getMessage());

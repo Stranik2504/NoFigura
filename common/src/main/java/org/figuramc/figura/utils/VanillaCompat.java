@@ -1,18 +1,20 @@
 package org.figuramc.figura.utils;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.client.Minecraft;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.ResourceManager;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Central compatibility layer for vanilla format/path changes in 26.3.
@@ -275,4 +277,25 @@ public final class VanillaCompat {
         }
     }
 
+    /** Client-side entity compatibility for EntityTask. */
+    public static final class Entities {
+
+        private static final AtomicInteger FAKE_ENTITY_ID = new AtomicInteger(-1);
+
+        private Entities() {
+        }
+
+        /** EntityTask entities are not in a level and need a non-zero ID on 26.3. */
+        public static int nextFakeEntityId() {
+            return FAKE_ENTITY_ID.getAndDecrement();
+        }
+
+        /** Adds the 26.3 block-attached fields when they are missing. */
+        public static void addBlockAttachedDefaults(CompoundTag nbt) {
+            if (!nbt.contains("block_pos"))
+                nbt.put("block_pos", new IntArrayTag(new int[]{0, 0, 0}));
+            if (!nbt.contains("facing"))
+                nbt.putByte("facing", (byte) Direction.SOUTH.get2DDataValue());
+        }
+    }
 }
