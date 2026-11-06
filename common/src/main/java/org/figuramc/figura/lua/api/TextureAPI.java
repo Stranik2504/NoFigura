@@ -1,5 +1,7 @@
 package org.figuramc.figura.lua.api;
 
+import org.figuramc.figura.utils.VanillaCompat;
+
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.platform.NativeImage;
@@ -182,6 +184,7 @@ public class TextureAPI {
             return register(name, nativeImage, false);
         } catch (Exception ignored) {}
         try {
+            resourceLocation = VanillaCompat.Textures.resolveResource(resourceLocation);
             Optional<Resource> resource = Minecraft.getInstance().getResourceManager().getResource(resourceLocation);
             // if the string is a valid resourceLocation but does not point to a valid resource, missingno
             NativeImage image = resource.isPresent() ? NativeImage.read(resource.get().open()) : MissingTextureAtlasSpriteAccessor.generateImage(16, 16);

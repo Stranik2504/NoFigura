@@ -7,6 +7,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.ResourceManager;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Central compatibility layer for vanilla format/path changes in 26.3.
@@ -129,6 +135,143 @@ public final class VanillaCompat {
         public static String normalizeOptions(String id) {
             id = id.trim();
             return id.replaceFirst("^([^\\s{]+)\\s+\\{", "$1{");
+        }
+    }
+
+    /** Legacy vanilla texture paths used by older avatars. */
+    public static final class Textures {
+
+        private static final byte[] WHITE_64X32 = java.util.Base64.getDecoder().decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAgCAYAAACinX6EAAAAPElEQVR42u3QAQEAAAgCIP+f1h8FE0ifiwABAgQIECBAgAABAgQIECBAgAABAgQIECBAgAABAgQIEHDfACHE4dJh9HFRAAAAAElFTkSuQmCC");
+
+        private static final Map<Identifier, Identifier> RESOURCE_CACHE = new ConcurrentHashMap<>();
+        private static volatile ResourceManager cachedManager;
+
+        private Textures() {
+        }
+
+        /** 26.3 resource path for a legacy for_modeling texture name, or null. */
+        public static String modelTexturePath(String name) {
+            String n = name.endsWith(".png") ? name.substring(0, name.length() - 4) : name;
+            return switch (n) {
+                case "leather_layer_1" -> "textures/entity/equipment/humanoid/leather.png";
+                case "leather_layer_1_overlay" -> "textures/entity/equipment/humanoid/leather_overlay.png";
+                case "leather_layer_2" -> "textures/entity/equipment/humanoid_leggings/leather.png";
+                case "leather_layer_2_overlay" -> "textures/entity/equipment/humanoid_leggings/leather_overlay.png";
+                case "oak_log" -> "textures/block/oak_log.png";
+                case "oak_log_top" -> "textures/block/oak_log_top.png";
+                // Approximate only: the original for_modeling/oak.png may be a
+                // custom 64x32 atlas, not a vanilla 16x16 block texture.
+                case "oak" -> "textures/block/oak_planks.png";
+                case "water_flow" -> "textures/block/water_flow.png";
+                case "water_still" -> "textures/block/water_still.png";
+                case "beacon_beam" -> "textures/entity/beacon/beacon_beam.png";
+                case "snow_fox" -> "textures/entity/fox/snow.png";
+                case "sunflower_front" -> "textures/block/sunflower_front.png";
+                default -> null;
+            };
+        }
+
+        /** Bytes for a legacy model texture, or null if there is no fallback. */
+        public static byte[] modelTexture(String name) {
+            String n = name.endsWith(".png") ? name.substring(0, name.length() - 4) : name;
+            // Approximate only: the original white.png may be a custom atlas.
+            if (n.equals("white"))
+                return WHITE_64X32;
+
+            String path = modelTexturePath(name);
+            if (path == null)
+                return null;
+
+            try {
+                return ResourceUtils.getResource(
+                        Minecraft.getInstance().getResourceManager(),
+                        Identifier.withDefaultNamespace(path)
+                );
+            } catch (Throwable ignored) {
+                return null;
+            }
+        }
+
+        /** Maps a runtime RESOURCE id to a 26.3 vanilla path when the old one is absent. */
+        public static Identifier resolveResource(Identifier id) {
+            ResourceManager manager = Minecraft.getInstance().getResourceManager();
+            if (manager == null)
+                return id;
+
+            // Resource reloads replace the manager; do not keep aliases from the
+            // previous generation, otherwise a pack that adds/removes a texture
+            // would keep resolving through stale state.
+            if (manager != cachedManager) {
+                synchronized (Textures.class) {
+                    if (manager != cachedManager) {
+                        RESOURCE_CACHE.clear();
+                        cachedManager = manager;
+                    }
+                }
+            }
+
+            return RESOURCE_CACHE.computeIfAbsent(id, key -> resolveUncached(key, manager));
+        }
+
+        private static Identifier resolveUncached(Identifier id, ResourceManager manager) {
+            try {
+                if (manager.getResource(id).isPresent())
+                    return id;
+
+                String alias = legacyResourcePath(id.getPath());
+                if (alias != null) {
+                    Identifier candidate = Identifier.fromNamespaceAndPath(id.getNamespace(), alias);
+                    if (manager.getResource(candidate).isPresent())
+                        return candidate;
+                }
+            } catch (Throwable ignored) {
+            }
+            return id;
+        }
+
+        // package-private for unit tests
+        static String legacyResourcePath(String path) {
+            // Rabbit textures gained a rabbit_ prefix in 26.3.
+            if (path.startsWith("textures/entity/rabbit/") && path.endsWith(".png")) {
+                String file = path.substring("textures/entity/rabbit/".length());
+                if (!file.startsWith("rabbit_"))
+                    return "textures/entity/rabbit/rabbit_" + file;
+            }
+
+            // Hanging-sign entity textures became block textures.
+            if (path.startsWith("textures/entity/signs/hanging/") && path.endsWith(".png")) {
+                String wood = path.substring("textures/entity/signs/hanging/".length(), path.length() - 4);
+                return "textures/block/" + wood + "_hanging_sign.png";
+            }
+
+            // Armor layers moved under entity/equipment in 1.21.2+.
+            if (path.startsWith("textures/models/armor/") && path.endsWith(".png")) {
+                String file = path.substring("textures/models/armor/".length(), path.length() - 4);
+                boolean overlay = file.endsWith("_overlay");
+                if (overlay)
+                    file = file.substring(0, file.length() - "_overlay".length());
+
+                String material;
+                String folder;
+                if (file.endsWith("_layer_1")) {
+                    material = file.substring(0, file.length() - "_layer_1".length());
+                    folder = "humanoid";
+                } else if (file.endsWith("_layer_2")) {
+                    material = file.substring(0, file.length() - "_layer_2".length());
+                    folder = "humanoid_leggings";
+                } else {
+                    return null;
+                }
+
+                return "textures/entity/equipment/" + folder + "/" + material + (overlay ? "_overlay" : "") + ".png";
+            }
+
+            // The beacon beam moved into the beacon subfolder.
+            if (path.equals("textures/entity/beacon_beam.png"))
+                return "textures/entity/beacon/beacon_beam.png";
+
+            return null;
         }
     }
 
