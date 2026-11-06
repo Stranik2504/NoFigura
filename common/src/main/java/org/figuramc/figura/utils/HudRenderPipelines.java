@@ -64,8 +64,14 @@ public final class HudRenderPipelines {
                 builder.withVertexShader(shader.getValue());
         }
 
-        for (Map.Entry<String, String> define : base.getShaderDefines().values().entrySet())
-            builder.withShaderDefine(define.getKey(), Integer.parseInt(define.getValue()));
+        for (Map.Entry<String, String> define : base.getShaderDefines().values().entrySet()) {
+            // Shader define values may be ints or floats (e.g. ALPHA_CUTOUT 0.1).
+            String value = define.getValue();
+            if (value.indexOf('.') >= 0 || value.indexOf('e') >= 0 || value.indexOf('E') >= 0)
+                builder.withShaderDefine(define.getKey(), Float.parseFloat(value));
+            else
+                builder.withShaderDefine(define.getKey(), Integer.parseInt(value));
+        }
         for (String flag : base.getShaderDefines().flags())
             builder.withShaderDefine(flag);
 
