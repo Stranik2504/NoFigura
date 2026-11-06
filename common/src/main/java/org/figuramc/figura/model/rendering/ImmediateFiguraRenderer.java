@@ -29,7 +29,9 @@ import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
 import org.figuramc.figura.model.rendertasks.RenderTask;
 import org.figuramc.figura.utils.ColorUtils;
 import org.figuramc.figura.utils.FiguraSubmitUtils;
+import org.figuramc.figura.utils.AvatarPartRenderTypes;
 import org.figuramc.figura.utils.HudRenderContext;
+import org.figuramc.figura.utils.WorldRenderContext;
 import org.figuramc.figura.utils.ui.UIHelper;
 
 import java.util.*;
@@ -43,6 +45,9 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
     public static final FiguraMat4 CAMERA_POS_TO_WORLD_MATRIX = FiguraMat4.of();
 
     private static final PartCustomization pivotOffsetter = new PartCustomization();
+
+    /** Part currently being pushed; used to detect single-face flat parts. */
+    protected FiguraModelPart currentPart;
 
     /**
      * Legacy HUD models use very large |z| values as a draw-order sentinel
@@ -365,7 +370,14 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
 
         // render this
         FiguraMod.popPushProfiler("pushVertices");
-        boolean breakRender = thisPassedPredicate && !part.pushVerticesImmediate(this, remainingComplexity);
+        FiguraModelPart previousPart = currentPart;
+        currentPart = part;
+        boolean breakRender;
+        try {
+            breakRender = thisPassedPredicate && !part.pushVerticesImmediate(this, remainingComplexity);
+        } finally {
+            currentPart = previousPart;
+        }
 
         // render extras
         FiguraMod.popPushProfiler("extras");
@@ -688,7 +700,37 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             ret.renderType = types.get(id);
         }
 
+        // World only: a fullbright part is unlit by definition. Use the 26.3
+        // EMISSIVE + NO_CARDINAL_LIGHTING pipeline variant, keeping the base
+        // render state (opaque/cutout/depth/cull). Lit parts keep PER_FACE_LIGHTING.
+        boolean skullFilter = currentFilterScheme == PartFilterScheme.SKULL;
+        boolean scoped = WorldRenderContext.isWorldEntityPass()
+                || WorldRenderContext.isSkullBlockRender() || skullFilter;
+        if (scoped && id != null && types != null) {
+            RenderType variant = null;
+            if (AvatarPartRenderTypes.isFullbright(customization))
+                variant = AvatarPartRenderTypes.get(types, id);
+            else if (isSingleFace(currentPart))
+                variant = AvatarPartRenderTypes.getFlat(types, id);
+            if (variant != null)
+                ret.renderType = variant;
+        }
+
         return ret;
+    }
+
+    private static boolean isSingleFace(FiguraModelPart part) {
+        if (part == null || part.facesByTexture == null)
+            return false;
+        int faces = 0;
+        for (int count : part.facesByTexture) {
+            if (count <= 0)
+                continue;
+            faces += count;
+            if (faces > 1)
+                return false;
+        }
+        return faces == 1;
     }
 
     private static final FiguraVec4 pos = FiguraVec4.of();
