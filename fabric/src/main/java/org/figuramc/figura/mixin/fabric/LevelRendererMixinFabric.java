@@ -26,8 +26,6 @@ import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.math.matrix.FiguraMat3;
 import org.figuramc.figura.mixin.render.PoseStackAccessor;
 import org.figuramc.figura.utils.RenderUtils;
-import org.joml.Matrix4fStack;
-import org.joml.Matrix4fc;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,16 +34,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
-
 @Mixin(LevelRenderer.class)
 public class LevelRendererMixinFabric {
     @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
     @Shadow @Final private SubmitNodeStorage submitNodeStorage;
-    @Shadow @Final private FeatureRenderDispatcher featureRenderDispatcher;
 
-    @Inject(method = "render", at = @At("RETURN"))
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;submitFeatures(Lnet/minecraft/client/renderer/state/level/LevelRenderState;Lnet/minecraft/client/renderer/SubmitNodeCollector;Z)V"))
     private void renderLevelFirstPerson(GraphicsResourceAllocator resourceAllocator, boolean renderOutline, CameraRenderState cameraState, GpuBufferSlice terrainFog, Vector4f fogColor, boolean shouldRenderSky, boolean consistentDepthRequired, CallbackInfo ci) {
         Minecraft minecraft = Minecraft.getInstance();
         Camera camera = minecraft.gameRenderer.mainCamera();
@@ -94,31 +88,8 @@ public class LevelRendererMixinFabric {
             do {
                 stack.popPose();
             } while (((PoseStackAccessor) stack).getLastIndex() > lastIndex);
-        }
 
-        GameRenderer gameRenderer = Minecraft.getInstance().gameRenderer;
-        RenderTarget mainTarget = gameRenderer.mainRenderTarget();
-
-        GpuTextureView depthTextureView = consistentDepthRequired
-                ? gameRenderer.hud3DTarget.getDepthTextureView()
-                : mainTarget.getDepthTextureView();
-
-        Matrix4fStack modelViewStack = RenderSystem.getModelViewStack();
-        modelViewStack.pushMatrix();
-        modelViewStack.mul(cameraState.viewRotationMatrix);
-
-        try (
-                FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
-                RenderPass pass = RenderSystem.getDevice()
-                        .createCommandEncoder()
-                        .createRenderPass(() -> "FiguraFirstPerson",
-                                mainTarget.getColorTextureView(), Optional.empty(),
-                                depthTextureView, OptionalDouble.empty());
-        ) {
-            RenderSystem.bindDefaultUniforms(pass);
-            FeatureRenderDispatcher.renderAllFeatures(pass, frame);
-        } finally {
-            modelViewStack.popMatrix();
+            Avatar.firstPerson = false;
         }
 
         Avatar.firstPerson = false;

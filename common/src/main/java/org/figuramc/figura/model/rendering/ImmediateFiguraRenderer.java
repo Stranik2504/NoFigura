@@ -707,7 +707,8 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
                         .setUv((float) uv.x, (float) uv.y)
                         .setOverlay(overlay)
                         .setLight(light)
-                        .setNormal((float) normal.x, (float) normal.y, (float) normal.z);
+                        .setNormal((float) normal.x, (float) normal.y, (float) normal.z)
+                        .setLineWidth(1.0F);
             }
         });
     }

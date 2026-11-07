@@ -3,6 +3,7 @@ package org.figuramc.figura.ducks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
+import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemStack;
@@ -61,6 +62,23 @@ public final class SkullAvatarLookup {
             Avatar avatar = AvatarManager.getAvatarForPlayer(id);
             if (avatar != null)
                 return avatar;
+
+            try {
+                PlayerSkinRenderCache.RenderInfo info = Minecraft.getInstance().playerSkinRenderCache().getOrDefault(profile);
+
+                if (info != null && info.gameProfile() != null) {
+                    UUID resolvedId = info.gameProfile().id();
+
+                    if (resolvedId != null && !Util.NIL_UUID.equals(resolvedId)) {
+                        avatar = AvatarManager.getAvatarForPlayer(resolvedId);
+
+                        if (avatar != null)
+                            return avatar;
+                    }
+                }
+            } catch (RuntimeException ignored) {
+
+            }
         }
 
         String name = profile.partialProfile().name();

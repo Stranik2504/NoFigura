@@ -64,7 +64,7 @@ public class TextTask extends RenderTask {
         Font font = Minecraft.getInstance().font;
         int l = this.customization.light != null ? this.customization.light : light;
         int bg = backgroundColor != null ? ColorUtils.intRGBAToIntARGB(backgroundColor) : background ? (int) (Minecraft.getInstance().options.getBackgroundOpacity(0.25f) * 0xFF) << 24 : 0;
-        int out = outlineColor != null ? outlineColor : 0x202020;
+        int out = (outlineColor != null ? outlineColor : 0x202020) | 0xFF000000;
         int op = opacity << 24 | 0xFFFFFF;
         Font.DisplayMode displayMode = seeThrough ? Font.DisplayMode.SEE_THROUGH : Font.DisplayMode.POLYGON_OFFSET;
         float vertexOffset = outline ? FiguraMod.VERTEX_OFFSET : 0f;
@@ -74,6 +74,15 @@ public class TextTask extends RenderTask {
             public void acceptRenderable(TextRenderable renderable) {
                 VertexConsumer vc = buffer.getBuffer(renderable.renderType(displayMode));
                 renderable.render(matrix, vc, l, false);
+            }
+        };
+
+        Matrix4f fillMatrix = outline ? new Matrix4f(matrix).translate(0f, 0f, 0.03f) : matrix;
+        Font.GlyphVisitor fillVisitor = new Font.GlyphVisitor() {
+            @Override
+            public void acceptRenderable(TextRenderable renderable) {
+                VertexConsumer vc = buffer.getBuffer(renderable.renderType(displayMode));
+                renderable.render(fillMatrix, vc, l, false);
             }
         };
 
@@ -97,11 +106,9 @@ public class TextTask extends RenderTask {
 
                 outlinePrepared.visit(visitor);
 
-                if (seeThrough) {
-                    Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
+                Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
 
-                    prepared.visit(visitor);
-                }
+                prepared.visit(fillVisitor);
             } else {
                 Font.PreparedText prepared = font.prepareText(text.getVisualOrderText(), x, j, op, shadow, false, 0);
 
