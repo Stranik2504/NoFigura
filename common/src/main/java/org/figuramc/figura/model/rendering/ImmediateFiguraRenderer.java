@@ -27,8 +27,7 @@ import org.figuramc.figura.model.rendering.texture.FiguraRenderTypes;
 import org.figuramc.figura.model.rendering.texture.FiguraTexture;
 import org.figuramc.figura.model.rendering.texture.FiguraTextureSet;
 import org.figuramc.figura.model.rendertasks.RenderTask;
-import org.figuramc.figura.utils.ColorUtils;
-import org.figuramc.figura.utils.FiguraSubmitUtils;
+import org.figuramc.figura.utils.*;
 import org.figuramc.figura.utils.ui.UIHelper;
 
 import java.util.*;
@@ -42,6 +41,10 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
     public static final FiguraMat4 CAMERA_POS_TO_WORLD_MATRIX = FiguraMat4.of();
 
     private static final PartCustomization pivotOffsetter = new PartCustomization();
+
+    protected FiguraModelPart currentPart;
+
+    private static final double HUD_OVERLAY_Z_THRESHOLD = 500.0;
 
     protected VertexBuffer vertexBuffer;
     private final List<FiguraSubmission.QueuedRenderTask> queuedRenderTasks = new ArrayList<>();
@@ -198,18 +201,18 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             FiguraMod.pushProfiler("draw");
             if (currentSubmitNodeCollector != null) {
                 FiguraSubmission submission = new FiguraSubmission(
-                        Map.copyOf(vertexBuffer.primaryBuffers), Map.copyOf(vertexBuffer.secondaryBuffers),
-                        List.copyOf(queuedRenderTasks), List.copyOf(queuedPivotBoxes), outlineColor
+                    Collections.unmodifiableMap(orderEmissiveLast(vertexBuffer.primaryBuffers)),
+                    Collections.unmodifiableMap(orderEmissiveLast(vertexBuffer.secondaryBuffers)),
+                    List.copyOf(queuedRenderTasks), List.copyOf(queuedPivotBoxes), outlineColor
                 );
                 this.lastSubmission = submission;
                 FiguraSubmitUtils.submit(currentSubmitNodeCollector, submission);
             } else if (currentVertexConsumerProvider != null) {
-                // немедленный режим — пишем вершины прямо сейчас
-                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, vertexBuffer.primaryBuffers);
-                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, vertexBuffer.secondaryBuffers);
+                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, orderEmissiveLast(vertexBuffer.primaryBuffers));
+                FiguraSubmitUtils.drawImmediate(currentVertexConsumerProvider, orderEmissiveLast(vertexBuffer.secondaryBuffers));
+
                 for (var qt : queuedRenderTasks)
                     qt.task().render(qt.poseStack(), currentVertexConsumerProvider, qt.light(), qt.overlay());
-                // pivot-боксы в этом режиме, скорее всего, не нужны (debug-фича) — пропускаем
             }
             FiguraMod.popProfiler();
 
@@ -350,7 +353,15 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
 
         // render this
         FiguraMod.popPushProfiler("pushVertices");
-        boolean breakRender = thisPassedPredicate && !part.pushVerticesImmediate(this, remainingComplexity);
+        FiguraModelPart previousPart = currentPart;
+        currentPart = part;
+        boolean breakRender;
+
+        try {
+            breakRender = thisPassedPredicate && !part.pushVerticesImmediate(this, remainingComplexity);
+        } finally {
+            currentPart = previousPart;
+        }
 
         // render extras
         FiguraMod.popPushProfiler("extras");
@@ -673,7 +684,66 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             ret.renderType = types.get(id);
         }
 
+        boolean skullFilter = currentFilterScheme == PartFilterScheme.SKULL;
+        boolean scoped = WorldRenderContext.isWorldEntityPass() || WorldRenderContext.isSkullBlockRender() || skullFilter;
+
+        if (scoped && id != null && types != null) {
+            RenderType variant = null;
+
+            if (AvatarPartRenderTypes.isFullbright(customization))
+                variant = AvatarPartRenderTypes.get(types, id);
+            else if (isSingleFace(currentPart))
+                variant = AvatarPartRenderTypes.getFlat(types, id);
+
+            if (variant != null)
+                ret.renderType = variant;
+        }
+
         return ret;
+    }
+
+    private static LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> orderEmissiveLast(
+        Map<RenderType, List<Consumer<VertexConsumer>>> buffers
+    ) {
+        LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> normal = new LinkedHashMap<>();
+        LinkedHashMap<RenderType, List<Consumer<VertexConsumer>>> emissive = new LinkedHashMap<>();
+
+        for (var entry : buffers.entrySet()) {
+            if (isEmissive(entry.getKey()))
+                emissive.put(entry.getKey(), entry.getValue());
+            else
+                normal.put(entry.getKey(), entry.getValue());
+        }
+        
+        normal.putAll(emissive);
+        return normal;
+    }
+
+    private static boolean isEmissive(RenderType type) {
+        // Our own fullbright variants also carry EMISSIVE (they are unlit), but they
+        // are not glow overlays; exclude them by identity, not by name.
+        if (type == null || AvatarPartRenderTypes.isVariant(type))
+            return false;
+
+        return RenderPipelineUtils.isEmissive(type.pipeline());
+    }
+
+    private static boolean isSingleFace(FiguraModelPart part) {
+        if (part == null || part.facesByTexture == null)
+            return false;
+
+        int faces = 0;
+        for (int count : part.facesByTexture) {
+            if (count <= 0)
+                continue;
+
+            faces = count;
+
+            if (faces > 1)
+                return false;
+        }
+
+        return faces == 1;
     }
 
     private static final FiguraVec4 pos = FiguraVec4.of();
@@ -694,6 +764,11 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
 
                 pos.set(vertex.x, vertex.y, vertex.z, 1);
                 pos.transform(customization.positionMatrix);
+
+                if (currentFilterScheme == PartFilterScheme.HUD &&
+                        Math.abs(pos.z) > HUD_OVERLAY_Z_THRESHOLD * HudRenderContext.scale())
+                    pos.z = 0.0;
+
                 pos.add(pos.normalized().scale(vertexData.vertexOffset));
                 normal.set(vertex.nx, vertex.ny, vertex.nz);
                 normal.transform(customization.normalMatrix);

@@ -21,9 +21,8 @@ import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.math.vector.FiguraVec4;
 import org.figuramc.figura.model.rendering.EntityRenderMode;
 import org.figuramc.figura.utils.ColorUtils;
-import org.figuramc.figura.utils.FiguraSubmitUtils;
 import org.figuramc.figura.utils.RenderUtils;
-import org.joml.Matrix4fc;
+import org.figuramc.figura.utils.WorldRenderContext;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +36,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class LevelRendererMixin {
     @Shadow @Final private EntityRenderDispatcher entityRenderDispatcher;
     @Shadow @Final private RenderBuffers renderBuffers;
+
+    @Inject(method = "submitEntities", at = @At("HEAD"))
+    private void figura$beginWorldEntityPass(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector submitNodeCollector, CallbackInfo ci) {
+        WorldRenderContext.beginWorldEntityPass();
+    }
+
+    @Inject(method = "submitEntities", at = @At("RETURN"))
+    private void figura$endWorldEntityPass(PoseStack poseStack, LevelRenderState levelRenderState, SubmitNodeCollector submitNodeCollector, CallbackInfo ci) {
+        WorldRenderContext.endWorldEntityPass();
+    }
+
 
     @ModifyArg(method = "submitEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderDispatcher;submit(Lnet/minecraft/client/renderer/entity/state/EntityRenderState;Lnet/minecraft/client/renderer/state/level/CameraRenderState;DDDLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;)V"))
     private <S extends EntityRenderState> S renderLevelRenderEntity(S entityRenderState) {

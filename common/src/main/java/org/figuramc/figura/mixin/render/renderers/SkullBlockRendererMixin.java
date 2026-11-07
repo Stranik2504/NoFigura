@@ -17,12 +17,12 @@ import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.Avatar;
-import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.*;
 import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.lua.api.world.BlockStateAPI;
 import org.figuramc.figura.lua.api.world.ItemStackAPI;
 import org.figuramc.figura.permissions.Permissions;
+import org.figuramc.figura.utils.WorldRenderContext;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -96,11 +96,19 @@ public abstract class SkullBlockRendererMixin implements BlockEntityRenderer<Sku
         // render skull :3
         FiguraMod.popPushProfiler("render");
         stack.pushPose();
-        var rendered = bool || localAvatar.skullRender(stack, submitNodeCollector, light, null, 0f);
-        stack.popPose();
 
-        if (rendered)
-            ci.cancel();
+        boolean skullBlock = localMode == SkullBlockRendererAccessor.SkullRenderMode.BLOCK;
+        if (skullBlock) WorldRenderContext.beginSkullBlockRender();
+
+        try {
+            var rendered = bool || localAvatar.skullRender(stack, submitNodeCollector, light, null, 0f);
+
+            if (rendered)
+                ci.cancel();
+        } finally {
+            if (skullBlock) WorldRenderContext.endSkullBlockRender();
+            stack.popPose();
+        }
 
         FiguraMod.popProfiler(5);
     }

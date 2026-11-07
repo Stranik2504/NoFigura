@@ -6,21 +6,16 @@ import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.textures.*;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
 import com.mojang.renderpearl.api.commands.RenderPass;
-import net.minecraft.client.renderer.SubmitNodeCollector;
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
-import net.minecraft.client.renderer.ProjectionMatrixBuffer;
-import net.minecraft.client.renderer.RenderPipelines;
-import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.utils.HudRenderContext;
 import org.jspecify.annotations.NonNull;
-import org.joml.Matrix4f;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -28,6 +23,7 @@ import java.util.OptionalDouble;
 public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderState> {
 
     private final ProjectionMatrixBuffer hudProjectionMatrixBuffer = new ProjectionMatrixBuffer("Hud-PIP");
+    private final Projection hudProjection = new Projection();
     private final SubmitNodeStorage submitNodeStorage = new SubmitNodeStorage();
 
     private GpuTexture texture, depthTexture;
@@ -44,10 +40,6 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
         if (state.avatar() == null)
             return;
 
-        // сохраняем ровно ту трансформацию, что раньше делал Avatar.hudRender сам:
-        poseStack.last().pose().scale(16, 16, -16);
-        poseStack.last().normal().scale(1, 1, -1);
-
         state.avatar().hudRender(poseStack, submitNodeCollector, state.entity(), state.tickDelta());
     }
 
@@ -61,16 +53,30 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
         int width = (state.x1() - state.x0()) * guiScale;
         int height = (state.y1() - state.y0()) * guiScale;
 
-        prepareTexturesAndProjection(width, height);
+        float scale = guiScale * state.scale();
+        prepareTexturesAndProjection(width, height, scale);
 
         PoseStack poseStack = new PoseStack();
-        // центр экрана — как раньше делал matrix4fStack.translation(0,0,-11000) + stack.setIdentity()
-        poseStack.translate(width / 2.0F, height / 2.0F, 0.0F);
+        poseStack.scale(scale, scale, scale);
 
-        this.renderToTexture(state, poseStack, this.submitNodeStorage);
+        HudRenderContext.setScale(scale);
 
+        try {
+            this.renderToTexture(state, poseStack, this.submitNodeStorage);
+        } finally {
+            HudRenderContext.clear();
+        }
+
+        FeatureRenderDispatcher.PreparedFrame frame;
+
+        HudRenderContext.beginHudPass();
+        try {
+            frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
+        } finally {
+            HudRenderContext.endHudPass();
+        }
         try (
-                FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
+                frame;
                 RenderPass pass = RenderSystem.getDevice()
                         .createCommandEncoder()
                         .createRenderPass(() -> "FiguraHud", textureView, Optional.empty(), depthTextureView, OptionalDouble.empty())
@@ -82,7 +88,7 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
         this.blitTexture(state, guiRenderState);
     }
 
-    private void prepareTexturesAndProjection(int width, int height) {
+    private void prepareTexturesAndProjection(int width, int height, float scale) {
         boolean needsRecreate = texture == null || texture.getWidth(0) != width || texture.getHeight(0) != height;
         if (needsRecreate) {
             if (texture != null) {
@@ -99,10 +105,8 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
         }
 
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture, GuiRenderer.CLEAR_COLOR, depthTexture, 0.0);
-        RenderSystem.setProjectionMatrix(
-                hudProjectionMatrixBuffer.getBuffer(new Matrix4f().setOrtho(0.0F, width, height, 0.0F, 1000.0F, 11000.0F)),
-                ProjectionType.ORTHOGRAPHIC
-        );
+        hudProjection.setupOrtho(-10000.0F * scale, 10000.0F * scale, width, height, true);
+        RenderSystem.setProjectionMatrix(hudProjectionMatrixBuffer.getBuffer(hudProjection), ProjectionType.ORTHOGRAPHIC);
     }
 
     @Override
