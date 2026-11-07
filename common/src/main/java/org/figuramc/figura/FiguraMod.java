@@ -84,6 +84,7 @@ public class FiguraMod {
         listeners.add(Emojis.RESOURCE_LISTENER);
         listeners.add(AvatarWizard.RESOURCE_LISTENER);
         listeners.add(AvatarManager.RESOURCE_RELOAD_EVENT);
+        listeners.add(LegacyTexturePack.RESOURCE_LISTENER);
         return listeners;
     }
 
