@@ -109,7 +109,7 @@ public class FiguraTexture extends SimpleTexture {
     }
 
     public void closeFromRenderThread() {
-        Minecraft.getInstance().execute(this::close);
+        Minecraft.getInstance().execute(this::unload);
     }
 
     @Override
@@ -126,7 +126,13 @@ public class FiguraTexture extends SimpleTexture {
             backup.close();
 
         super.close();
-        ((TextureManagerAccessor) Minecraft.getInstance().getTextureManager()).getByPath().remove(this.getLocation());
+    }
+
+    public void unload() {
+        if (registered) {
+            ((TextureManagerAccessor) Minecraft.getInstance().getTextureManager()).getByPath().remove(this.getLocation());
+        }
+        this.close();
     }
 
     public void uploadIfDirty(boolean clamp, boolean blur) {

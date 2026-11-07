@@ -150,7 +150,7 @@ public abstract class FiguraRenderer {
         for (FiguraTextureSet set : textureSets)
             set.clean();
         for (FiguraTexture texture : customTextures.values())
-            texture.close();
+            texture.unload();
     }
 
     public void invalidate() {

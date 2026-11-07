@@ -1280,7 +1280,7 @@ public class Avatar {
 
         FiguraTexture oldText = renderer.customTextures.get(name);
         if (oldText != null)
-            oldText.close();
+            oldText.unload();
 
         if (renderer.customTextures.size() > TextureAPI.TEXTURE_LIMIT)
             throw new LuaError("Maximum amount of textures reached!");
