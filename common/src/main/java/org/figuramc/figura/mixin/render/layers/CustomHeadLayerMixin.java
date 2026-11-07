@@ -28,6 +28,7 @@ import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.ducks.FiguraItemStackRenderStateExtension;
+import org.figuramc.figura.ducks.SkullAvatarLookup;
 import org.figuramc.figura.ducks.SkullBlockRendererAccessor;
 import org.figuramc.figura.lua.api.world.ItemStackAPI;
 import org.figuramc.figura.math.vector.FiguraVec3;
@@ -71,8 +72,15 @@ public abstract class CustomHeadLayerMixin<S extends LivingEntityRenderState, M 
 
         // script hide
         if (avatar.luaRuntime != null && !avatar.luaRuntime.vanilla_model.HELMET_ITEM.checkVisible()) {
-            ci.cancel();
-            return;
+            boolean customHead =
+                    entityState.wornHeadType != null &&
+                    itemStack.get(net.minecraft.core.component.DataComponents.PROFILE) != null &&
+                    SkullAvatarLookup.fromItem(itemStack) != null;
+
+            if (!customHead) {
+                ci.cancel();
+                return;
+            }
         }
 
         // pivot part
