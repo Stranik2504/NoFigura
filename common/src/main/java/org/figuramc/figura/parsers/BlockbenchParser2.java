@@ -9,6 +9,7 @@ import net.minecraft.nbt.ListTag;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.math.vector.FiguraVec2;
 import org.figuramc.figura.utils.IOUtils;
+import org.figuramc.figura.compat.texture.TextureResolver;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.FileNotFoundException;
@@ -243,16 +244,25 @@ public class BlockbenchParser2 {
                     if (e instanceof IOException || e instanceof NullPointerException)
                         FiguraMod.LOGGER.error("", e);
 
-                    // Try to load from base64
-                    if (texture.source == null || !texture.source.startsWith("data:image/png;base64,"))
-                        throw new IllegalStateException(String.format(
-                                "Failed to find the %s texture: %s\n(and the bundled texture data was missing or bad)",
-                                texture.name,
-                                e
-                        ));
-                    source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
-                    path = locatedWithin + Intermediary.this.name + "." + name;
-                    FiguraMod.debug("Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
+                    // Prefer the avatar's bundled base64 data, then fall back to
+                    // the 26.3 vanilla resource for legacy for_modeling textures.
+                    if (texture.source != null && texture.source.startsWith("data:image/png;base64,")) {
+                        source = Base64.getDecoder().decode(texture.source.substring("data:image/png;base64,".length()));
+                        path = locatedWithin + Intermediary.this.name + "." + name;
+                        FiguraMod.debug("Loaded {} texture \"{}\" as path {} (bundled)", textureType, name, path);
+                    } else {
+                        byte[] vanilla = TextureResolver.modelTexture(texture.name);
+                        if (vanilla == null)
+                            throw new IllegalStateException(String.format(
+                                    "Failed to find the %s texture: %s\n(and the bundled texture data was missing or bad)",
+                                    texture.name,
+                                    e
+                            ));
+                        source = vanilla;
+                        path = locatedWithin + "vanilla." + name;
+                        name = locatedWithin + name;
+                        FiguraMod.debug("Loaded {} texture \"{}\" as path {} (vanilla fallback)", textureType, name, path);
+                    }
                 }
 
                 if (!textureType.equals("d"))
