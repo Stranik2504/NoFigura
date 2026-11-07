@@ -21,6 +21,13 @@ public final class TextureResolver {
     private TextureResolver() {
     }
 
+    public static void clearCache() {
+        synchronized (TextureResolver.class) {
+            RESOURCE_CACHE.clear();
+            cachedManager = null;
+        }
+    }
+
     /** Bytes for a legacy model texture, or null if there is no fallback. */
     public static byte[] modelTexture(String name) {
         String n = name.endsWith(".png") ? name.substring(0, name.length() - 4) : name;

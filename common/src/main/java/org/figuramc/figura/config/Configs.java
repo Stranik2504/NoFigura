@@ -242,6 +242,8 @@ public class Configs {
             DEBUG_MODE = new ConfigType.BoolConfig("debug_mode", DEV, false, false);
     public static final ConfigType.BoolConfig
             LOCAL_ASSETS = new ConfigType.BoolConfig("local_assets", DEV, false, false);
+    public static final ConfigType.BoolConfig
+            LEGACY_TEXTURES = new ConfigType.BoolConfig("legacy_textures", DEV, true);
 
     public static final ConfigType.BoolConfig
             CONNECTION_TOASTS = new ConfigType.BoolConfig("connection_toasts", DEV, true),

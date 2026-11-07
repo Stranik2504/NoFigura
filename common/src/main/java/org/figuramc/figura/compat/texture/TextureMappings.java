@@ -20,6 +20,7 @@ public final class TextureMappings {
     private static final Map<String, String> EXACT = new HashMap<>();
     private static final Map<String, String> NAMES = new HashMap<>();
     private static final List<PatternRule> PATTERNS = new ArrayList<>();
+    private static final List<String> LEGACY = new ArrayList<>();
 
     static {
         load();
@@ -48,6 +49,12 @@ public final class TextureMappings {
                     NAMES.put(entry.getKey(), entry.getValue().getAsString());
             }
 
+            JsonArray legacy = root.getAsJsonArray("legacy");
+            if (legacy != null) {
+                for (JsonElement element : legacy)
+                    LEGACY.add(element.getAsString());
+            }
+
             JsonArray patterns = root.getAsJsonArray("patterns");
             if (patterns != null) {
                 for (JsonElement element : patterns) {
@@ -66,6 +73,11 @@ public final class TextureMappings {
         if (n.equals("white"))
             return null;
         return NAMES.get(n);
+    }
+
+    /** All old paths that should be provided by the 1.21.4 legacy pack. */
+    public static List<String> legacyPaths() {
+        return List.copyOf(LEGACY);
     }
 
     /** Exact or pattern-mapped path for an old RESOURCE path, or null. */
