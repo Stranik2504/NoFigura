@@ -15,10 +15,10 @@ import org.figuramc.figura.lua.docs.LuaMethodDoc;
 import org.figuramc.figura.lua.docs.LuaMethodOverload;
 import org.figuramc.figura.lua.docs.LuaTypeDoc;
 import org.figuramc.figura.math.vector.FiguraVec3;
+import org.figuramc.figura.compat.ParticleCompat;
 import org.figuramc.figura.utils.LuaUtils;
 import org.luaj.vm2.LuaError;
 
-import java.util.Objects;
 
 @LuaWhitelist
 @LuaTypeDoc(
@@ -39,7 +39,13 @@ public class ParticleAPI {
 
     private LuaParticle generate(String id, double x, double y, double z, double w, double t, double h) {
         try {
-            id = convertOldToNewParticleFormat(id);
+            // Some old avatars still pass "id {options}" (with a space). 26.3's
+            // ParticleArgument expects "id{options}"; without this the options are
+            // ignored and codecs like flash report "No key color in MapLike[{}]".
+            id = new ParticleCompat(id)
+                    .normalizeOptions()
+                    .convertLegacy()
+                    .getId();
             ParticleOptions options = ParticleArgument.readParticle(new StringReader(id), WorldAPI.getCurrentWorld().registryAccess());
             Particle p = getParticleEngine().figura$makeParticle(options, x, y, z, w, t, h);
             if (p == null) throw new LuaError("Could not parse particle \"" + id + "\"");
@@ -47,160 +53,6 @@ public class ParticleAPI {
         } catch (Exception e) {
             throw new LuaError(e.getMessage());
         }
-    }
-
-    private String convertOldToNewParticleFormat(String id) {
-        if (id.contains("block ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String blockPart = id.split("block ")[1];
-            String ret = "block{block_state:{";
-            String blockName;
-
-            if (blockPart.contains("[")) {
-                blockName = blockPart.split("\\[")[0];
-                String properties = id.substring(id.indexOf("[")+1, id.indexOf("]")+1);
-                properties = properties.replaceAll("=", ":\"").replaceAll(",", "\",").replace("]", "\"");
-                ret += ("Name:\"" + blockName + "\",Properties:{" + properties + "}");
-            } else {
-                blockName = blockPart;
-                ret += ("Name:\"" + blockName + "\"");
-            }
-
-            ret += "}}";
-            id = ret;
-        } else if (id.contains("block_marker ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String blockPart = id.split("block_marker ")[1];
-            String ret = "block_marker{block_state:{";
-            String blockName;
-
-            if (blockPart.contains("[")) {
-                blockName = blockPart.split("\\[")[0];
-                String properties = id.substring(id.indexOf("[")+1, id.indexOf("]")+1);
-                properties = properties.replaceAll("=", ":\"").replaceAll(",", "\",").replace("]", "\"");
-                ret += ("Name:\"" + blockName + "\",Properties:{" + properties + "}");
-            } else {
-                blockName = blockPart;
-                ret += ("Name:\"" + blockName + "\"");
-            }
-
-            ret += "}}";
-            id = ret;
-        } else if (id.contains("falling_dust ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String blockPart = id.split("falling_dust ")[1];
-            String ret = "falling_dust{block_state:{";
-            String blockName;
-
-            if (blockPart.contains("[")) {
-                blockName = blockPart.split("\\[")[0];
-                String properties = id.substring(id.indexOf("[")+1, id.indexOf("]")+1);
-                properties = properties.replaceAll("=", ":\"").replaceAll(",", "\",").replace("]", "\"");
-                ret += ("Name:\"" + blockName + "\",Properties:{" + properties + "}");
-            } else {
-                blockName = blockPart;
-                ret += ("Name:\"" + blockName + "\"");
-            }
-
-            ret += "}}";
-            id = ret;
-        } else if (id.contains("dust ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "dust{";
-            if (Objects.equals(parts[0], "dust")) {
-                String num1 = parts[1];
-                String num2 = parts[2];
-                String num3 = parts[3];
-                if (!num1.contains("."))
-                    num1 += ".0";
-                if (!num2.contains("."))
-                    num2 += ".0";
-                if (!num3.contains("."))
-                    num3 += ".0";
-
-                ret += ("color:[" + num1 + "," + num2 + "," + num3+ "],scale:"+parts[4]);
-            }
-
-            ret += "}";
-            id = ret;
-        } else if (id.contains("dust_color_transition ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "dust_color_transition{";
-            if (Objects.equals(parts[0], "dust_color_transition")) {
-                String rFrom = parts[1];
-                String gFrom = parts[2];
-                String bFrom = parts[3];
-                if (!rFrom.contains("."))
-                    rFrom += ".0";
-                if (!gFrom.contains("."))
-                    gFrom += ".0";
-                if (!bFrom.contains("."))
-                    bFrom += ".0";
-
-                String scale = parts[4];
-                String rTo = parts[5];
-                String gTo = parts[6];
-                String bTo = parts[7];
-                if (!rTo.contains("."))
-                    rTo += ".0";
-                if (!gTo.contains("."))
-                    gTo += ".0";
-                if (!bTo.contains("."))
-                    bTo += ".0";
-                ret += ("from_color:[" + rFrom + "," + gFrom + "," + bFrom + "],scale:"+scale+",to_color:["+rTo + "," + gTo + "," + bTo + "]");
-            }
-            ret += "}";
-            id = ret;
-        } else if (id.contains("item ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "item{";
-            if (Objects.equals(parts[0], "item")) {
-                String itemId = parts[1];
-                ret += ("item:{id:"+itemId+"}");
-            }
-            ret += "}";
-            id = ret;
-        } else if (id.contains("sculk_charge ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "sculk_charge{";
-            if (Objects.equals(parts[0], "sculk_charge")) {
-                String roll = parts[1];
-                ret += ("roll:"+roll);
-            }
-            ret += "}";
-            id = ret;
-        } else if (id.contains("shriek ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "shriek{";
-            if (Objects.equals(parts[0], "shriek")) {
-                String delay = parts[1];
-                ret += ("delay:"+delay);
-            }
-            ret += "}";
-            id = ret;
-        } else if (id.contains("vibration ")) {
-            id = id.replaceFirst("minecraft:", "");
-            String[] parts = id.split(" ");
-            String ret = "vibration{";
-            if (Objects.equals(parts[0], "vibration")) {
-                String dsX = parts[1];
-                String dsY = parts[2];
-                String dsZ = parts[3];
-                String arr = parts[4];
-                ret += ("arrival_in_ticks:"+arr+",destination:{type:block,pos:["+dsX+","+dsY+","+dsZ+"]}");
-            }
-            ret += "}";
-            id = ret;
-        } else if (id.contains("entity_effect")) {
-            if (!id.contains("{"))
-                id += "{color:[0.0,0.0,0.0,1.0]}";
-        }
-        return id;
     }
 
     @LuaWhitelist
@@ -263,6 +115,10 @@ public class ParticleAPI {
     )
     public boolean isPresent(String id) {
         try {
+            id = new ParticleCompat(id)
+                    .normalizeOptions()
+                    .convertLegacy()
+                    .getId();
             ParticleOptions options = ParticleArgument.readParticle(new StringReader(id), WorldAPI.getCurrentWorld().registryAccess());
             return getParticleEngine().figura$makeParticle(options, 0, 0, 0, 0, 0, 0) != null;
         } catch (Exception ignored) {
