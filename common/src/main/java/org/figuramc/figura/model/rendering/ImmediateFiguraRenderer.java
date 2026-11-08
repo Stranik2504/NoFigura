@@ -737,7 +737,7 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
             if (count <= 0)
                 continue;
 
-            faces = count;
+            faces += count;
 
             if (faces > 1)
                 return false;
