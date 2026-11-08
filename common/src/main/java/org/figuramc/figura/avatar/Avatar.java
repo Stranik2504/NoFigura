@@ -1,7 +1,6 @@
 package org.figuramc.figura.avatar;
 
 import com.mojang.blaze3d.audio.SoundBuffer;
-import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -240,7 +239,6 @@ public class Avatar {
             }
 
             loaded = true;
-            Minecraft.getInstance().execute(() -> Minecraft.getInstance().levelExtractor.allChanged());
         });
     }
 
