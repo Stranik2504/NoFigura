@@ -42,8 +42,10 @@ public class ParticleAPI {
             // Some old avatars still pass "id {options}" (with a space). 26.3's
             // ParticleArgument expects "id{options}"; without this the options are
             // ignored and codecs like flash report "No key color in MapLike[{}]".
-            id = ParticleCompat.normalizeOptions(id);
-            id = ParticleCompat.convertLegacy(id);
+            id = new ParticleCompat(id)
+                    .normalizeOptions()
+                    .convertLegacy()
+                    .getId();
             ParticleOptions options = ParticleArgument.readParticle(new StringReader(id), WorldAPI.getCurrentWorld().registryAccess());
             Particle p = getParticleEngine().figura$makeParticle(options, x, y, z, w, t, h);
             if (p == null) throw new LuaError("Could not parse particle \"" + id + "\"");
@@ -113,8 +115,10 @@ public class ParticleAPI {
     )
     public boolean isPresent(String id) {
         try {
-            id = ParticleCompat.normalizeOptions(id);
-            id = ParticleCompat.convertLegacy(id);
+            id = new ParticleCompat(id)
+                    .normalizeOptions()
+                    .convertLegacy()
+                    .getId();
             ParticleOptions options = ParticleArgument.readParticle(new StringReader(id), WorldAPI.getCurrentWorld().registryAccess());
             return getParticleEngine().figura$makeParticle(options, 0, 0, 0, 0, 0, 0) != null;
         } catch (Exception ignored) {

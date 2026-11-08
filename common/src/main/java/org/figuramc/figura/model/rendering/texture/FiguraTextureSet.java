@@ -1,7 +1,5 @@
 package org.figuramc.figura.model.rendering.texture;
 
-import org.figuramc.figura.compat.texture.TextureResolver;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.PlayerInfo;
@@ -85,7 +83,7 @@ public class FiguraTextureSet {
             }
             case RESOURCE -> {
                 try {
-                    yield TextureResolver.resolveResource(Identifier.parse(String.valueOf(pair.getValue())));
+                    yield Identifier.parse(String.valueOf(pair.getValue()));
                 } catch (Exception ignored) {
                     yield MissingTextureAtlasSprite.getLocation();
                 }

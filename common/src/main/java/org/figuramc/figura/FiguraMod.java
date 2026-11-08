@@ -25,7 +25,6 @@ import org.figuramc.figura.mixin.MinecraftAccessor;
 import org.figuramc.figura.gui.widgets.DebugEntryFigura;
 import org.figuramc.figura.permissions.PermissionManager;
 import org.figuramc.figura.resources.FiguraRuntimeResources;
-import org.figuramc.figura.compat.texture.LegacyTexturePack;
 import org.figuramc.figura.utils.*;
 import org.figuramc.figura.wizards.AvatarWizard;
 import org.slf4j.Logger;
@@ -68,7 +67,6 @@ public class FiguraMod {
         CacheAvatarLoader.init();
         FiguraDocsManager.init();
         FiguraRuntimeResources.init();
-        LegacyTexturePack.init();
         DebugScreenEntriesAccessor.figura$invokeRegister(FIGURA_DEBUG_KEY, new DebugEntryFigura());
 
         GeckoLibCompat.init();
@@ -84,7 +82,6 @@ public class FiguraMod {
         listeners.add(Emojis.RESOURCE_LISTENER);
         listeners.add(AvatarWizard.RESOURCE_LISTENER);
         listeners.add(AvatarManager.RESOURCE_RELOAD_EVENT);
-        listeners.add(LegacyTexturePack.RESOURCE_LISTENER);
         return listeners;
     }
 

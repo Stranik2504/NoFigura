@@ -2,8 +2,13 @@ package org.figuramc.figura.compat;
 
 /** 26.3 particle-argument compatibility. */
 public final class ParticleCompat {
+    String id;
 
     private ParticleCompat() {
+    }
+
+    public ParticleCompat(String id) {
+        this.id = id;
     }
 
     /** Normalizes legacy "id {options}" to 26.3's "id{options}". */
@@ -12,12 +17,19 @@ public final class ParticleCompat {
         return id.replaceFirst("^([^\\s{]+)\\s+\\{", "$1{");
     }
 
+    public ParticleCompat normalizeOptions() {
+        return new ParticleCompat(normalizeOptions(id));
+    }
+
     public static String convertLegacy(String id) {
         String trimmed = id.trim();
 
         // entity_effect with no options keeps its original special case.
         if (trimmed.contains("entity_effect") && !trimmed.contains("{"))
             return trimmed + "{color:[0.0,0.0,0.0,1.0]}";
+
+        if (trimmed.contains("flash") && !trimmed.contains("{"))
+            return trimmed + "{color:[1.0,1.0,1.0,1.0]}";
 
         int space = trimmed.indexOf(' ');
         if (space <= 0)
@@ -71,6 +83,14 @@ public final class ParticleCompat {
             }
             default -> id;
         };
+    }
+
+    public ParticleCompat convertLegacy() {
+        return new ParticleCompat(convertLegacy(id));
+    }
+
+    public String getId() {
+        return id;
     }
 
     private static String decimal(String value) {
