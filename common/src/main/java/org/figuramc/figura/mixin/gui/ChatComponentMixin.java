@@ -63,9 +63,17 @@ public class ChatComponentMixin {
         // receive event
         Avatar localPlayer = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         if (localPlayer != null) {
-            TextUtils.allowScriptEvents = true;
-            String json = ComponentSerialization.CODEC.encodeStart(this.minecraft.player.registryAccess().createSerializationContext(JsonOps.INSTANCE), message).getOrThrow().toString();
-            TextUtils.allowScriptEvents = false;
+            boolean allowScriptEvents = TextUtils.allowScriptEvents;
+            String json;
+            try {
+                TextUtils.allowScriptEvents = true;
+                json = ComponentSerialization.CODEC.encodeStart(this.minecraft.player.registryAccess().createSerializationContext(JsonOps.INSTANCE), message).getOrThrow().toString();
+            } catch (IllegalStateException e) {
+                // Client-only components such as player heads cannot be encoded as chat JSON.
+                return message;
+            } finally {
+                TextUtils.allowScriptEvents = allowScriptEvents;
+            }
 
             Pair<String, Integer> event = localPlayer.chatReceivedMessageEvent(message.getString(), json);
             if (event != null) {
