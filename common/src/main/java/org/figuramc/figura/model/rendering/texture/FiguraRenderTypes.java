@@ -76,7 +76,7 @@ public enum FiguraRenderTypes {
     private static class FiguraRenderType {
         private static final BiFunction<Identifier, Boolean, RenderType> CUTOUT_EMISSIVE_SOLID = Util.memoize(
                 (texture, affectsOutline) ->
-                        FiguraRenderTypeFactory.create("figura_cutout_emissive_solid",
+                        RenderType.create("figura_cutout_emissive_solid",
                                 RenderSetup.builder(RenderPipelines.BEACON_BEAM_TRANSLUCENT)
                                         .withTexture("Sampler0", texture)
                                         .affectsCrumbling()
@@ -89,7 +89,7 @@ public enum FiguraRenderTypes {
 
 
         public static final Function<Identifier, RenderType> TEXTURED_PORTAL = Util.memoize(
-                texture -> FiguraRenderTypeFactory.create(
+                texture -> RenderType.create(
                         "figura_textured_portal",
                         RenderSetup.builder(RenderPipelines.END_GATEWAY)
                                 .withTexture("Sampler0", texture)
@@ -100,7 +100,7 @@ public enum FiguraRenderTypes {
         );
 
         public static final Function<Identifier, RenderType> BLURRY = Util.memoize(
-                texture -> FiguraRenderTypeFactory.create(
+                texture -> RenderType.create(
                         "figura_blurry",
                         RenderSetup.builder(RenderPipelines.ENTITY_TRANSLUCENT)
                                 .affectsCrumbling()
@@ -120,7 +120,7 @@ public enum FiguraRenderTypes {
         );
 
         public static final Function<Identifier, RenderType> TEXTURED_GLINT = Util.memoize(
-                texture -> FiguraRenderTypeFactory.create(
+                texture -> RenderType.create(
                         "figura_textured_glint_direct",
                         RenderSetup.builder(RenderPipelines.GLINT)
                                 .withTexture("Sampler0", texture)
