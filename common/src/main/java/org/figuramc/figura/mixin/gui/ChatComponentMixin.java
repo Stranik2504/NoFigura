@@ -63,11 +63,21 @@ public class ChatComponentMixin {
         // receive event
         Avatar localPlayer = AvatarManager.getAvatarForPlayer(FiguraMod.getLocalPlayerUUID());
         if (localPlayer != null) {
-            TextUtils.allowScriptEvents = true;
-            String json = ComponentSerialization.CODEC.encodeStart(this.minecraft.player.registryAccess().createSerializationContext(JsonOps.INSTANCE), message).getOrThrow().toString();
-            TextUtils.allowScriptEvents = false;
+            Component serializable = TextUtils.stripPlayerSprites(message);
+            String json;
 
-            Pair<String, Integer> event = localPlayer.chatReceivedMessageEvent(message.getString(), json);
+            TextUtils.allowScriptEvents = true;
+
+            try {
+                json = ComponentSerialization.CODEC.encodeStart(this.minecraft.player.registryAccess().createSerializationContext(JsonOps.INSTANCE), serializable).getOrThrow().toString();
+            } catch (RuntimeException e) {
+                FiguraMod.LOGGER.warn("Skipping chat received event, message can't be serialized: {}", e.getMessage());
+                json = null;
+            } finally {
+                TextUtils.allowScriptEvents = false;
+            }
+
+            Pair<String, Integer> event = json == null ? null : localPlayer.chatReceivedMessageEvent(serializable.getString(), json);
             if (event != null) {
                 String newMessage = event.getFirst();
                 if (newMessage == null)

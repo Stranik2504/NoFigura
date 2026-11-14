@@ -11,6 +11,9 @@ import net.minecraft.client.gui.TextAlignment;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.ObjectContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
+import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringDecomposer;
@@ -472,6 +475,33 @@ public class TextUtils {
             return Optional.empty();
         }, Style.EMPTY);
         return builder[0];
+    }
+
+    public static Component stripPlayerSprites(Component component) {
+        if (component.getContents() instanceof ObjectContents(var info, var fallback) &&
+                info instanceof PlayerSprite
+        )
+            return Component.empty();
+
+        MutableComponent copy;
+
+        if (component.getContents() instanceof TranslatableContents translatable) {
+            Object[] args = translatable.getArgs().clone();
+
+            for (int i = 0; i < args.length; i++) {
+                if (args[i] instanceof Component argument)
+                    args[i] = stripPlayerSprites(argument);
+            }
+
+            copy = Component.translatableWithFallback(translatable.getKey(), translatable.getFallback(), args);
+        } else {
+            copy = component.plainCopy();
+        }
+
+        copy.setStyle(component.getStyle());
+        for (Component sibling : component.getSiblings())
+            copy.append(stripPlayerSprites(sibling));
+        return copy;
     }
 
     public static Component trim(FormattedText text) {

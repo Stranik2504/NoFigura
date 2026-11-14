@@ -4,7 +4,6 @@
     "package": "org.figuramc.figura.mixin",
     "compatibilityLevel": "JAVA_25",
     "mixins": [
-        "compat.WaveyCapesLayerMixin"
     ],
     "client": [
         "AABBInvoker",
@@ -35,6 +34,7 @@
         "compat.GeckolibGeoArmorRendererMixin",
         "compat.GeckolibGeoRendererMixin",
         "compat.SimpleVCMixin",
+        "compat.WaveyCapesLayerMixin",
         "font.BakedSheetGlyphMixin",
         "font.BitmapGlyphMixin",
         "font.FontAccessor",

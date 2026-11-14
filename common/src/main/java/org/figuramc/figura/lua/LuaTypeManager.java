@@ -367,9 +367,11 @@ public class LuaTypeManager {
             return wrapArray(val);
         else if (val instanceof Component c) {
             TextUtils.allowScriptEvents = true;
-            LuaValue ret = LuaValue.valueOf(ComponentSerialization.CODEC.encodeStart(TextUtils.OPS, c).getOrThrow().toString());
-            TextUtils.allowScriptEvents = false;
-            return ret;
+            try {
+                return LuaValue.valueOf(ComponentSerialization.CODEC.encodeStart(TextUtils.OPS, TextUtils.stripPlayerSprites(c)).getOrThrow().toString());
+            } finally {
+                TextUtils.allowScriptEvents = false;
+            }
         }
         else
             return wrap(val);
