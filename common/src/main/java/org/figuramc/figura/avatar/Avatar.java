@@ -421,6 +421,11 @@ public class Avatar {
         return isCancelled(result);
     }
 
+    public boolean projectileRenderEvent(String event, float delta, EntityAPI<?> entity) {
+        Varargs result = loaded ? run(event, render, delta, entity) : null;
+        return isCancelled(result);
+    }
+
     public boolean itemRenderEvent(ItemStackAPI item, String mode, FiguraVec3 pos, FiguraVec3 rot, FiguraVec3 scale, boolean leftHanded, PoseStack stack, SubmitNodeCollector nodeCollector, int light, int overlay) {
         if (!loaded || renderer == null || !renderer.interceptRendersIntoFigura) {
             return false;

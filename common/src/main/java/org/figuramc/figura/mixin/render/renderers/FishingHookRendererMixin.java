@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.FishingHook;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.permissions.Permissions;
@@ -77,6 +78,8 @@ public class FishingHookRendererMixin {
          * space by default. Authors who want billboarding can use the Camera
          * parent type on the part (or its children).
          */
+        boolean cancelled = avatar.projectileRenderEvent("FISHING_BOBBER_RENDER", tickDelta, EntityAPI.wrap(hook));
+
         poseStack.pushPose();
         boolean rendered;
         try {
@@ -86,7 +89,7 @@ public class FishingHookRendererMixin {
             poseStack.popPose();
         }
 
-        if (!rendered)
+        if (!(cancelled || rendered))
             original.call(collector, poseStack, renderType, geometry);
     }
 }

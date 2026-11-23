@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.AbstractWindCharge;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.model.rendering.PartFilterScheme;
 import org.figuramc.figura.utils.RenderUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,8 +47,13 @@ public class WindChargeRendererMixin {
             return;
         }
 
-        if (!avatar.renderSpecialPart(scheme, poseStack, collector, RenderUtils.getTickDelta(state),
-                state.lightCoords, state.outlineColor))
+        float tickDelta = RenderUtils.getTickDelta(state);
+        String event = RenderUtils.projectileEvent(scheme);
+        boolean cancelled = event != null && avatar.projectileRenderEvent(event, tickDelta, EntityAPI.wrap(entity));
+        boolean rendered = avatar.renderSpecialPart(scheme, poseStack, collector, tickDelta,
+                state.lightCoords, state.outlineColor);
+
+        if (!(cancelled || rendered))
             original.call(collector, model, modelState, poseStack, renderType, light, overlay, outlineColor);
     }
 

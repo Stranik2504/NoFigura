@@ -35,6 +35,7 @@ import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.ducks.FiguraSubmitCallBackExtension;
 import org.figuramc.figura.lua.api.vanilla_model.VanillaPart;
 import org.figuramc.figura.model.ParentType;
+import org.figuramc.figura.model.rendering.PartFilterScheme;
 import org.figuramc.figura.permissions.Permissions;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -78,6 +79,31 @@ public class RenderUtils {
 
     public static float getTickDelta(EntityRenderState state) {
         return state == null ? 1f : ((FiguraEntityRenderStateExtension) state).figura$getTickDelta();
+    }
+
+    public static String projectileEvent(PartFilterScheme scheme) {
+        if (scheme == null)
+            return null;
+
+        return switch (scheme) {
+            case SNOWBALL -> "SNOWBALL_RENDER";
+            case EGG -> "EGG_RENDER";
+            case FIREWORK_ROCKET -> "FIREWORK_ROCKET_RENDER";
+            case ENDER_PEARL -> "ENDER_PEARL_RENDER";
+            case EXPERIENCE_BOTTLE -> "EXPERIENCE_BOTTLE_RENDER";
+            case SPLASH_POTION -> "SPLASH_POTION_RENDER";
+            case LINGERING_POTION -> "LINGERING_POTION_RENDER";
+            case WIND_CHARGE -> "WIND_CHARGE_RENDER";
+            case FIREBALL -> "FIREBALL_RENDER";
+            case SMALL_FIREBALL -> "SMALL_FIREBALL_RENDER";
+            case BREEZE_WIND_CHARGE -> "BREEZE_WIND_CHARGE_RENDER";
+            case WITHER_SKULL -> "WITHER_SKULL_RENDER";
+            case SHULKER_BULLET -> "SHULKER_BULLET_RENDER";
+            case LLAMA_SPIT -> "LLAMA_SPIT_RENDER";
+            case DRAGON_FIREBALL -> "DRAGON_FIREBALL_RENDER";
+            case FISHING_BOBBER -> "FISHING_BOBBER_RENDER";
+            default -> null;
+        };
     }
 
     public static TextureAtlasSprite firstFireLayer(Avatar avatar) {

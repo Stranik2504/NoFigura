@@ -16,6 +16,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.model.rendering.PartFilterScheme;
 import org.figuramc.figura.utils.RenderUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,10 +64,12 @@ public class ShulkerBulletRendererMixin {
             return;
         }
 
+        float tickDelta = RenderUtils.getTickDelta(state);
+        boolean cancelled = avatar.projectileRenderEvent("SHULKER_BULLET_RENDER", tickDelta, EntityAPI.wrap(entity));
         boolean rendered = avatar.renderSpecialPart(PartFilterScheme.SHULKER_BULLET, poseStack, collector,
-                RenderUtils.getTickDelta(state), state.lightCoords, state.outlineColor);
+                tickDelta, state.lightCoords, state.outlineColor);
 
-        if (rendered)
+        if (cancelled || rendered)
             figura$shulkerBulletReplaced = true;
         else
             original.call(collector, model, modelState, poseStack, texture, light, overlay, outlineColor);

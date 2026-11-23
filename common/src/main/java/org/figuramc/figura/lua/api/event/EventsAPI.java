@@ -77,6 +77,54 @@ public class EventsAPI {
     @LuaFieldDoc("events.trident_render")
     public final LuaEvent TRIDENT_RENDER = new LuaEvent();
     @LuaWhitelist
+    @LuaFieldDoc("events.snowball_render")
+    public final LuaEvent SNOWBALL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.egg_render")
+    public final LuaEvent EGG_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.firework_rocket_render")
+    public final LuaEvent FIREWORK_ROCKET_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.ender_pearl_render")
+    public final LuaEvent ENDER_PEARL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.experience_bottle_render")
+    public final LuaEvent EXPERIENCE_BOTTLE_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.splash_potion_render")
+    public final LuaEvent SPLASH_POTION_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.lingering_potion_render")
+    public final LuaEvent LINGERING_POTION_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.wind_charge_render")
+    public final LuaEvent WIND_CHARGE_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.fireball_render")
+    public final LuaEvent FIREBALL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.small_fireball_render")
+    public final LuaEvent SMALL_FIREBALL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.breeze_wind_charge_render")
+    public final LuaEvent BREEZE_WIND_CHARGE_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.wither_skull_render")
+    public final LuaEvent WITHER_SKULL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.shulker_bullet_render")
+    public final LuaEvent SHULKER_BULLET_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.llama_spit_render")
+    public final LuaEvent LLAMA_SPIT_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.dragon_fireball_render")
+    public final LuaEvent DRAGON_FIREBALL_RENDER = new LuaEvent();
+    @LuaWhitelist
+    @LuaFieldDoc("events.fishing_bobber_render")
+    public final LuaEvent FISHING_BOBBER_RENDER = new LuaEvent();
+    @LuaWhitelist
     @LuaFieldDoc("events.item_render")
     public final LuaEvent ITEM_RENDER = new LuaEvent();
     @LuaWhitelist
@@ -112,6 +160,22 @@ public class EventsAPI {
         events.put("USE_ITEM", USE_ITEM);
         events.put("ARROW_RENDER", ARROW_RENDER);
         events.put("TRIDENT_RENDER", TRIDENT_RENDER);
+        events.put("SNOWBALL_RENDER", SNOWBALL_RENDER);
+        events.put("EGG_RENDER", EGG_RENDER);
+        events.put("FIREWORK_ROCKET_RENDER", FIREWORK_ROCKET_RENDER);
+        events.put("ENDER_PEARL_RENDER", ENDER_PEARL_RENDER);
+        events.put("EXPERIENCE_BOTTLE_RENDER", EXPERIENCE_BOTTLE_RENDER);
+        events.put("SPLASH_POTION_RENDER", SPLASH_POTION_RENDER);
+        events.put("LINGERING_POTION_RENDER", LINGERING_POTION_RENDER);
+        events.put("WIND_CHARGE_RENDER", WIND_CHARGE_RENDER);
+        events.put("FIREBALL_RENDER", FIREBALL_RENDER);
+        events.put("SMALL_FIREBALL_RENDER", SMALL_FIREBALL_RENDER);
+        events.put("BREEZE_WIND_CHARGE_RENDER", BREEZE_WIND_CHARGE_RENDER);
+        events.put("WITHER_SKULL_RENDER", WITHER_SKULL_RENDER);
+        events.put("SHULKER_BULLET_RENDER", SHULKER_BULLET_RENDER);
+        events.put("LLAMA_SPIT_RENDER", LLAMA_SPIT_RENDER);
+        events.put("DRAGON_FIREBALL_RENDER", DRAGON_FIREBALL_RENDER);
+        events.put("FISHING_BOBBER_RENDER", FISHING_BOBBER_RENDER);
         events.put("ITEM_RENDER", ITEM_RENDER);
         events.put("ON_PLAY_SOUND", ON_PLAY_SOUND);
         events.put("RESOURCE_RELOAD", RESOURCE_RELOAD);

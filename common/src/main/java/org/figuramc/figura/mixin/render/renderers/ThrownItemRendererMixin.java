@@ -14,6 +14,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.Projectile;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.model.rendering.PartFilterScheme;
 import org.figuramc.figura.utils.RenderUtils;
 import org.joml.Quaternionf;
@@ -64,17 +65,21 @@ public class ThrownItemRendererMixin {
             return;
         }
 
+        float tickDelta = RenderUtils.getTickDelta(state);
+        String event = RenderUtils.projectileEvent(scheme);
+        boolean cancelled = event != null && avatar.projectileRenderEvent(event, tickDelta, EntityAPI.wrap(entity));
+
         poseStack.pushPose();
         boolean rendered;
         try {
             poseStack.rotate(new Quaternionf(cameraRenderState.orientation).conjugate());
-            rendered = avatar.renderSpecialPart(scheme, poseStack, collector, RenderUtils.getTickDelta(state),
+            rendered = avatar.renderSpecialPart(scheme, poseStack, collector, tickDelta,
                     state.lightCoords, state.outlineColor);
         } finally {
             poseStack.popPose();
         }
 
-        if (!rendered)
+        if (!(cancelled || rendered))
             original.call(itemState, poseStack, collector, light, overlay, outlineColor);
     }
 

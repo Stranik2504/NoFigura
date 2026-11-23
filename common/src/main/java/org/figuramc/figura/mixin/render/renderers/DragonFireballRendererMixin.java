@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.hurtingprojectile.DragonFireball;
 import org.figuramc.figura.avatar.Avatar;
+import org.figuramc.figura.lua.api.entity.EntityAPI;
 import org.figuramc.figura.model.rendering.PartFilterScheme;
 import org.figuramc.figura.utils.RenderUtils;
 import org.joml.Quaternionf;
@@ -63,17 +64,20 @@ public class DragonFireballRendererMixin {
             return;
         }
 
+        float tickDelta = RenderUtils.getTickDelta(state);
+        boolean cancelled = avatar.projectileRenderEvent("DRAGON_FIREBALL_RENDER", tickDelta, EntityAPI.wrap(entity));
+
         poseStack.pushPose();
         boolean rendered;
         try {
             poseStack.rotate(new Quaternionf(cameraRenderState.orientation).conjugate());
             rendered = avatar.renderSpecialPart(PartFilterScheme.DRAGON_FIREBALL, poseStack, collector,
-                    RenderUtils.getTickDelta(state), state.lightCoords, state.outlineColor);
+                    tickDelta, state.lightCoords, state.outlineColor);
         } finally {
             poseStack.popPose();
         }
 
-        if (rendered)
+        if (cancelled || rendered)
             figura$dragonFireballReplaced = true;
         else
             original.call(collector, poseStack, renderType, geometry);
