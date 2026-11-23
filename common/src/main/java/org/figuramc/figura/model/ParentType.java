@@ -35,6 +35,7 @@ public enum ParentType {
     Arrow(true, false, "ARROW"),
     Trident(true, false, "TRIDENT"),
     Item(true, false, "ITEM"),
+    FishingBobber(true, false, "FISHING_BOBBER"),
 
     // Held items, birds, n stuff
     LeftItemPivot(false, true,"LEFT_ITEM_PIVOT"),

@@ -123,6 +123,7 @@
         "render.renderers.EntityRenderDispatcherMixin",
         "render.renderers.EntityRendererMixin",
         "render.renderers.EntityRenderStateMixin",
+        "render.renderers.FishingHookRendererMixin",
         "render.renderers.FirstPersonHandsAndItemsMixin",
         "render.renderers.ItemInHandRendererMixin",
         "render.renderers.ItemModelResolverMixin",

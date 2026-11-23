@@ -967,6 +967,19 @@ public class Avatar {
         return comp > 0;
     }
 
+    public boolean renderFishingBobber(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
+        if (renderer == null || !loaded)
+            return false;
+
+        renderer.setupRenderer(
+            PartFilterScheme.FISHING_BOBBER, collector, stack,
+            delta, light, 1f, OverlayTexture.NO_OVERLAY,
+            false, false, outlineColor
+        );
+
+        return renderer.renderSpecialParts() > 0;
+    }
+
     public boolean isItemPart(FiguraModelPart modelPart) {
         return renderer != null && loaded && modelPart.parentType == ParentType.Item;
     }
