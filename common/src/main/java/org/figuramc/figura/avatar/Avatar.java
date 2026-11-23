@@ -967,17 +967,21 @@ public class Avatar {
         return comp > 0;
     }
 
-    public boolean renderFishingBobber(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
+    public boolean renderSpecialPart(PartFilterScheme scheme, PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
         if (renderer == null || !loaded)
             return false;
 
         renderer.setupRenderer(
-            PartFilterScheme.FISHING_BOBBER, collector, stack,
+            scheme, collector, stack,
             delta, light, 1f, OverlayTexture.NO_OVERLAY,
             false, false, outlineColor
         );
 
         return renderer.renderSpecialParts() > 0;
+    }
+
+    public boolean renderFishingBobber(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
+        return renderSpecialPart(PartFilterScheme.FISHING_BOBBER, stack, collector, delta, light, outlineColor);
     }
 
     public boolean isItemPart(FiguraModelPart modelPart) {
