@@ -22,13 +22,15 @@ import java.util.OptionalDouble;
 
 public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderState> {
 
+    private static final int COLOR_USAGE = GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT;
+    private static final int DEPTH_USAGE = GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT;
+
     private final ProjectionMatrixBuffer hudProjectionMatrixBuffer = new ProjectionMatrixBuffer("Hud-PIP");
     private final Projection hudProjection = new Projection();
     private final SubmitNodeStorage submitNodeStorage = new SubmitNodeStorage();
 
     private GpuTexture texture, depthTexture;
     private GpuTextureView textureView, depthTextureView;
-    private GpuSampler sampler;
 
     @Override
     public @NonNull Class<FiguraHudRenderState> getRenderStateClass() {
@@ -94,14 +96,12 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
             if (texture != null) {
                 texture.close(); textureView.close();
                 depthTexture.close(); depthTextureView.close();
-                if (sampler != null) sampler.close();
             }
             GpuDevice gpuDevice = RenderSystem.getDevice();
-            texture = gpuDevice.createTexture(() -> "UI figura-hud texture", 13, GpuFormat.RGBA8_UNORM, width, height, 1, 1);
+            texture = gpuDevice.createTexture(() -> "UI figura-hud texture", COLOR_USAGE, GpuFormat.RGBA8_UNORM, width, height, 1, 1);
             textureView = gpuDevice.createTextureView(texture);
-            depthTexture = gpuDevice.createTexture(() -> "UI figura-hud depth texture", 9, GpuFormat.D32_FLOAT, width, height, 1, 1);
+            depthTexture = gpuDevice.createTexture(() -> "UI figura-hud depth texture", DEPTH_USAGE, GpuFormat.D32_FLOAT, width, height, 1, 1);
             depthTextureView = gpuDevice.createTextureView(depthTexture);
-            sampler = gpuDevice.createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.NEAREST, FilterMode.NEAREST, 1, OptionalDouble.empty());
         }
 
         RenderSystem.getDevice().createCommandEncoder().clearColorAndDepthTextures(texture, GuiRenderer.CLEAR_COLOR, depthTexture, 0.0);
@@ -111,6 +111,7 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
 
     @Override
     protected void blitTexture(FiguraHudRenderState state, GuiRenderState guiRenderState) {
+        GpuSampler sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
         guiRenderState.addBlitToCurrentLayer(
                 new BlitRenderState(
                         RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
@@ -137,7 +138,6 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
             texture.close(); textureView.close();
             depthTexture.close(); depthTextureView.close();
         }
-        if (sampler != null) sampler.close();
         hudProjectionMatrixBuffer.close();
     }
 }

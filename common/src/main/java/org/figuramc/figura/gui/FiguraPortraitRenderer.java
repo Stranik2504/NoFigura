@@ -3,7 +3,6 @@ package org.figuramc.figura.gui;
 import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.renderpearl.api.commands.RenderPass;
-import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,26 +17,30 @@ import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.feature.FeatureRenderDispatcher;
 import net.minecraft.client.renderer.state.gui.BlitRenderState;
 import net.minecraft.client.renderer.state.gui.GuiRenderState;
+import net.minecraft.client.renderer.Projection;
 import net.minecraft.client.renderer.ProjectionMatrixBuffer;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.gui.widgets.permissions.PlayerPermPackElement;
-import org.figuramc.figura.utils.ui.UIHelper;
-import org.joml.Matrix4f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 
 public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortraitRenderState> {
 
+    private static final int COLOR_USAGE = GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_TEXTURE_BINDING | GpuTexture.USAGE_RENDER_ATTACHMENT;
+    private static final int DEPTH_USAGE = GpuTexture.USAGE_COPY_DST | GpuTexture.USAGE_RENDER_ATTACHMENT;
+
     private final ProjectionMatrixBuffer avatarProjectionMatrixBuffer = new ProjectionMatrixBuffer(
             "Portrait-PIP - " + this.getClass().getSimpleName()
     );
+    private final Projection avatarProjection = new Projection();
     private final SubmitNodeStorage submitNodeStorage = new SubmitNodeStorage();
     Map<Avatar, TextureEntry> avatarToTexture = new HashMap<>();
     private boolean renderSkin;
@@ -79,7 +82,7 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
                     FeatureRenderDispatcher.PreparedFrame frame = featureRenderDispatcher.prepareFrame(this.submitNodeStorage);
                     RenderPass pass = RenderSystem.getDevice()
                             .createCommandEncoder()
-                            .createRenderPass(() -> "FiguraPortrait", textureEntry.textureView, java.util.Optional.empty(), textureEntry.depthTextureView, java.util.OptionalDouble.empty());
+                            .createRenderPass(() -> "FiguraPortrait", textureEntry.textureView, Optional.empty(), textureEntry.depthTextureView, OptionalDouble.empty())
             ) {
                 RenderSystem.bindDefaultUniforms(pass);
                 FeatureRenderDispatcher.renderAllFeatures(pass, frame);
@@ -106,32 +109,32 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
             entry.depthTexture.close();
             entry.depthTexture = null;
             entry.depthTextureView.close();
-            entry.sampler.close();
-            entry.sampler = null;
         }
 
         GpuDevice gpuDevice = RenderSystem.getDevice();
         if (entry.texture == null) {
-            entry.texture = gpuDevice.createTexture(() -> "UI " + this.getTextureLabel() + " texture " + avatar.name, 13, GpuFormat.RGBA8_UNORM, i, j, 1, 1);
+            entry.texture = gpuDevice.createTexture(() -> "UI " + this.getTextureLabel() + " texture " + avatar.name, COLOR_USAGE, GpuFormat.RGBA8_UNORM, i, j, 1, 1);
             entry.textureView = gpuDevice.createTextureView(entry.texture);
-            entry.depthTexture = gpuDevice.createTexture(() -> "UI " + this.getTextureLabel() + " depth texture " + avatar.name, 9, GpuFormat.D32_FLOAT, i, j, 1, 1);
+            entry.depthTexture = gpuDevice.createTexture(() -> "UI " + this.getTextureLabel() + " depth texture " + avatar.name, DEPTH_USAGE, GpuFormat.D32_FLOAT, i, j, 1, 1);
             entry.depthTextureView = gpuDevice.createTextureView(entry.depthTexture);
-            entry.sampler = gpuDevice.createSampler(AddressMode.CLAMP_TO_EDGE, AddressMode.CLAMP_TO_EDGE, FilterMode.NEAREST, FilterMode.NEAREST, 1, OptionalDouble.empty());
         }
 
         gpuDevice.createCommandEncoder().clearColorAndDepthTextures(entry.texture, GuiRenderer.CLEAR_COLOR, entry.depthTexture, 0.0);
-        RenderSystem.setProjectionMatrix(this.avatarProjectionMatrixBuffer.getBuffer(new Matrix4f().setOrtho(0.0F, i, j, 0.0F, 1000.0F, -1000.0F)), ProjectionType.ORTHOGRAPHIC);
+        // Use Minecraft's projection so clip-space depth matches the active RenderPearl backend.
+        avatarProjection.setupOrtho(-1000.0F, 1000.0F, i, j, true);
+        RenderSystem.setProjectionMatrix(avatarProjectionMatrixBuffer.getBuffer(avatarProjection), ProjectionType.ORTHOGRAPHIC);
     }
 
     @Override
     protected void blitTexture(FiguraPortraitRenderState pictureInPictureRenderState, GuiRenderState guiRenderState) {
         if (!renderSkin){
             TextureEntry entry = avatarToTexture.get(pictureInPictureRenderState.avatar());
+            GpuSampler sampler = RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST);
 
             guiRenderState.addBlitToCurrentLayer(
                     new BlitRenderState(
                             RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
-                            TextureSetup.singleTexture(entry.textureView, entry.sampler),
+                            TextureSetup.singleTexture(entry.textureView, sampler),
                             pictureInPictureRenderState.pose(),
                             pictureInPictureRenderState.x0(),
                             pictureInPictureRenderState.y0(),
@@ -152,7 +155,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
         if (pictureInPictureRenderState.fallbackSkin() != null) {
             Identifier texture = pictureInPictureRenderState.fallbackSkin();
             // render skin
-            UIHelper.enableBlend();
             GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(texture).getTextureView();
             GpuSampler sampler = Minecraft.getInstance().getTextureManager().getTexture(texture).getSampler();
 
@@ -176,7 +178,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
             );
 
             // hat
-            /*GlStateManager._enableBlend(0);*/
             guiRenderState.addBlitToCurrentLayer(
                     new BlitRenderState(
                             RenderPipelines.GUI_TEXTURED_PREMULTIPLIED_ALPHA,
@@ -195,7 +196,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
                             null
                     )
             );
-            /*GlStateManager._disableBlend(0);*/
         } else {
             GpuTextureView gpuTextureView = Minecraft.getInstance().getTextureManager().getTexture(PlayerPermPackElement.UNKNOWN).getTextureView();
             GpuSampler sampler = Minecraft.getInstance().getTextureManager().getTexture(PlayerPermPackElement.UNKNOWN).getSampler();
@@ -242,7 +242,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
         private GpuTextureView textureView;
         private GpuTexture depthTexture;
         private GpuTextureView depthTextureView;
-        private GpuSampler sampler;
 
         @Override
         public boolean equals(Object obj) {

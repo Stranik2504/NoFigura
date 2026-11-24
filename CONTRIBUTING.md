@@ -20,6 +20,19 @@ Note - do not merge upstream into your pr branch if a clean rebase is possible.
 
 5. You may merge the Pull Request in once you have the sign-off of another developer, or if you do not have permission to do that, you may request a developer to merge it for you.
 
+## Rendering checks (Minecraft 26.3, Fabric)
+
+Use Minecraft's RenderPearl API for GPU resources and render passes, not either backend's implementation. Blaze3D helpers such as `PoseStack` and `RenderSystem` remain part of Minecraft's rendering API.
+
+Run `./gradlew build` to check both the Fabric build and its access widener. Then run the client once with each backend:
+
+```sh
+./gradlew :fabric:runClient --args='--graphicsBackend vulkan'
+./gradlew :fabric:runClient --args='--graphicsBackend opengl'
+```
+
+Check `fabric/run/logs/latest.log` for `Using graphics backend` to confirm which backend actually started. In a local world, load an avatar with a custom portrait and HUD parts. Check the avatar in third person, open its portrait in the permissions panel, and resize the window or change the GUI scale. The portrait and HUD should stay visible and correctly layered on both backends.
+
 ## Translation Contribution Process 
 1. You must be fluent and/or knowledgeable in the language you are translating to.
 

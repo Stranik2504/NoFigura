@@ -4,7 +4,6 @@ import com.mojang.blaze3d.Blaze3D;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.Std140Builder;
 import com.mojang.blaze3d.font.GlyphInfo;
-import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -81,59 +80,11 @@ public final class UIHelper {
     public static final Component UP_ARROW = Component.literal("^").withStyle(Style.EMPTY.withFont(new FontDescription.Resource(UIHelper.UI_FONT)));
     public static final Component DOWN_ARROW = Component.literal("V").withStyle(Style.EMPTY.withFont(new FontDescription.Resource(UIHelper.UI_FONT)));
 
-    // Used for GUI rendering
-    //private static final CustomFramebuffer FIGURA_FRAMEBUFFER = new CustomFramebuffer();
-    private static int previousFBO = -1;
     public static boolean paperdoll = false;
     public static float fireRot = 0f;
     public static float dollScale = 1f;
 
     // -- Functions -- // 
-
-/*    public static void useFiguraGuiFramebuffer() {
-        previousFBO = GL30.glGetInteger(GL30.GL_DRAW_FRAMEBUFFER_BINDING);
-
-        int width = Minecraft.getInstance().getWindow().getWidth();
-        int height = Minecraft.getInstance().getWindow().getHeight();
-        FIGURA_FRAMEBUFFER.setSize(width, height);
-
-        // Enable stencil buffer during this phase of rendering
-        GL30.glEnable(GL30.GL_STENCIL_TEST);
-        GlStateManager._stencilMask(0xFF);
-        // Bind custom GUI framebuffer to be used for rendering
-        GlStateManager._glBindFramebuffer(GL30.GL_FRAMEBUFFER, FIGURA_FRAMEBUFFER.getFbo());
-
-        // Clear GUI framebuffer
-        GlStateManager._clearStencil(0);
-        GlStateManager._clearColor(0f, 0f, 0f, 1f);
-        GlStateManager._clearDepth(1);
-        GlStateManager._clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT | GL30.GL_STENCIL_BUFFER_BIT);
-
-        Matrix4f mf = RenderSystem.getProjectionMatrix();
-        Minecraft.getInstance().getMainRenderTarget().blitToScreen(width, height);
-        RenderSystem.setProjectionMatrix(mf, ProjectionType.ORTHOGRAPHIC);
-    }
-
-    public static void useVanillaFramebuffer() {
-        // Reset state before we go back to normal rendering
-        GlStateManager._enableDepthTest();
-        // Set a sensible default for stencil buffer operations
-        GlStateManager._stencilFunc(GL11.GL_EQUAL, 0, 0xFF);
-        GL30.glDisable(GL30.GL_STENCIL_TEST);
-
-        // Bind vanilla framebuffer again
-        GlStateManager._glBindFramebuffer(GL30.GL_DRAW_FRAMEBUFFER, previousFBO);
-
-        RenderSystem.disableBlend();
-        // Draw GUI framebuffer -> vanilla framebuffer
-        int windowWidth = Minecraft.getInstance().getWindow().getWidth();
-        int windowHeight = Minecraft.getInstance().getWindow().getHeight();
-
-        Matrix4f mf = RenderSystem.getProjectionMatrix();
-        FIGURA_FRAMEBUFFER.drawToScreen(windowWidth, windowHeight);
-        RenderSystem.setProjectionMatrix(mf, ProjectionType.ORTHOGRAPHIC);
-        RenderSystem.enableBlend();
-    }*/
 
     private static GpuBuffer buffer = null;
     private static void setFiguraLighting() {
@@ -289,8 +240,7 @@ public final class UIHelper {
     }
 
     public static void enableBlend() {
-        /*GlStateManager._enableBlend(0);
-        GlStateManager._blendFuncSeparate(770, 771, 1, 0);*/
+        // Blend state is declared by the GUI render pipeline.
     }
 
     public static void blit(GuiGraphicsExtractor gui, int x, int y, int width, int height, Identifier texture) {
