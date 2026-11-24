@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.FireworkEntityRenderer;
 import net.minecraft.client.renderer.entity.state.FireworkRocketRenderState;
@@ -52,7 +53,26 @@ public class FireworkEntityRendererMixin {
         poseStack.pushPose();
         boolean rendered;
         try {
+            // The vanilla firework pose is translation * camera * shot-angle.
+            // Do not pre-multiply the inverse camera on the whole matrix: that would
+            // also rotate the accumulated entity translation. Instead, temporarily
+            // undo the shot rotations, remove the camera rotation, then put the
+            // shot rotations back around the same entity origin.
+            boolean shotAtAngle = state.isShotAtAngle;
+            if (shotAtAngle) {
+                poseStack.rotateDegrees(Axis.XP, -90f);
+                poseStack.rotateDegrees(Axis.YP, -180f);
+                poseStack.rotateDegrees(Axis.ZP, -180f);
+            }
+
             poseStack.rotate(new Quaternionf(cameraRenderState.orientation).conjugate());
+
+            if (shotAtAngle) {
+                poseStack.rotateDegrees(Axis.ZP, 180f);
+                poseStack.rotateDegrees(Axis.YP, 180f);
+                poseStack.rotateDegrees(Axis.XP, 90f);
+            }
+
             rendered = avatar.renderSpecialPart(PartFilterScheme.FIREWORK_ROCKET, poseStack, collector,
                     tickDelta, state.lightCoords, state.outlineColor);
         } finally {
