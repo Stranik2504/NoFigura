@@ -421,6 +421,11 @@ public class Avatar {
         return isCancelled(result);
     }
 
+    public boolean projectileRenderEvent(String event, float delta, EntityAPI<?> entity) {
+        Varargs result = loaded ? run(event, render, delta, entity) : null;
+        return isCancelled(result);
+    }
+
     public boolean itemRenderEvent(ItemStackAPI item, String mode, FiguraVec3 pos, FiguraVec3 rot, FiguraVec3 scale, boolean leftHanded, PoseStack stack, SubmitNodeCollector nodeCollector, int light, int overlay) {
         if (!loaded || renderer == null || !renderer.interceptRendersIntoFigura) {
             return false;
@@ -965,6 +970,23 @@ public class Avatar {
 
         stack.popPose();
         return comp > 0;
+    }
+
+    public boolean renderSpecialPart(PartFilterScheme scheme, PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
+        if (renderer == null || !loaded)
+            return false;
+
+        renderer.setupRenderer(
+            scheme, collector, stack,
+            delta, light, 1f, OverlayTexture.NO_OVERLAY,
+            false, false, outlineColor
+        );
+
+        return renderer.renderSpecialParts() > 0;
+    }
+
+    public boolean renderFishingBobber(PoseStack stack, SubmitNodeCollector collector, float delta, int light, int outlineColor) {
+        return renderSpecialPart(PartFilterScheme.FISHING_BOBBER, stack, collector, delta, light, outlineColor);
     }
 
     public boolean isItemPart(FiguraModelPart modelPart) {

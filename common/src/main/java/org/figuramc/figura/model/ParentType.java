@@ -35,6 +35,24 @@ public enum ParentType {
     Arrow(true, false, "ARROW"),
     Trident(true, false, "TRIDENT"),
     Item(true, false, "ITEM"),
+    FishingBobber(true, false, "FISHING_BOBBER"),
+
+    // Projectile / throwable replacements
+    Snowball(true, false, "SNOWBALL"),
+    Egg(true, false, "EGG"),
+    FireworkRocket(true, false, "FIREWORK_ROCKET", "Firework", "FIREWORK"),
+    EnderPearl(true, false, "ENDER_PEARL"),
+    ExperienceBottle(true, false, "EXPERIENCE_BOTTLE"),
+    SplashPotion(true, false, "SPLASH_POTION"),
+    LingeringPotion(true, false, "LINGERING_POTION"),
+    WindCharge(true, false, "WIND_CHARGE"),
+    Fireball(true, false, "FIREBALL"),
+    SmallFireball(true, false, "SMALL_FIREBALL"),
+    BreezeWindCharge(true, false, "BREEZE_WIND_CHARGE"),
+    WitherSkull(true, false, "WITHER_SKULL"),
+    ShulkerBullet(true, false, "SHULKER_BULLET"),
+    LlamaSpit(true, false, "LLAMA_SPIT"),
+    DragonFireball(true, false, "DRAGON_FIREBALL"),
 
     // Held items, birds, n stuff
     LeftItemPivot(false, true,"LEFT_ITEM_PIVOT"),

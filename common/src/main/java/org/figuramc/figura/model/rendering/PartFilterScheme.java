@@ -26,6 +26,22 @@ public enum PartFilterScheme {
     ARROW(false, SchemeFunction.onlyThisSeparate(ParentType.Arrow), ParentType.Arrow),
     TRIDENT(false, SchemeFunction.onlyThisSeparate(ParentType.Trident), ParentType.Trident),
     ITEM(false, SchemeFunction.onlyThisSeparate(ParentType.Item), ParentType.Item),
+    FISHING_BOBBER(false, SchemeFunction.onlyThisSeparate(ParentType.FishingBobber), ParentType.FishingBobber),
+    SNOWBALL(false, SchemeFunction.onlyThisSeparate(ParentType.Snowball), ParentType.Snowball),
+    EGG(false, SchemeFunction.onlyThisSeparate(ParentType.Egg), ParentType.Egg),
+    FIREWORK_ROCKET(false, SchemeFunction.onlyThisSeparate(ParentType.FireworkRocket), ParentType.FireworkRocket),
+    ENDER_PEARL(false, SchemeFunction.onlyThisSeparate(ParentType.EnderPearl), ParentType.EnderPearl),
+    EXPERIENCE_BOTTLE(false, SchemeFunction.onlyThisSeparate(ParentType.ExperienceBottle), ParentType.ExperienceBottle),
+    SPLASH_POTION(false, SchemeFunction.onlyThisSeparate(ParentType.SplashPotion), ParentType.SplashPotion),
+    LINGERING_POTION(false, SchemeFunction.onlyThisSeparate(ParentType.LingeringPotion), ParentType.LingeringPotion),
+    WIND_CHARGE(false, SchemeFunction.onlyThisSeparate(ParentType.WindCharge), ParentType.WindCharge),
+    FIREBALL(false, SchemeFunction.onlyThisSeparate(ParentType.Fireball), ParentType.Fireball),
+    SMALL_FIREBALL(false, SchemeFunction.onlyThisSeparate(ParentType.SmallFireball), ParentType.SmallFireball),
+    BREEZE_WIND_CHARGE(false, SchemeFunction.onlyThisSeparate(ParentType.BreezeWindCharge), ParentType.BreezeWindCharge),
+    WITHER_SKULL(false, SchemeFunction.onlyThisSeparate(ParentType.WitherSkull), ParentType.WitherSkull),
+    SHULKER_BULLET(false, SchemeFunction.onlyThisSeparate(ParentType.ShulkerBullet), ParentType.ShulkerBullet),
+    LLAMA_SPIT(false, SchemeFunction.onlyThisSeparate(ParentType.LlamaSpit), ParentType.LlamaSpit),
+    DRAGON_FIREBALL(false, SchemeFunction.onlyThisSeparate(ParentType.DragonFireball), ParentType.DragonFireball),
 
     PIVOTS(false, SchemeFunction.onlyPivotsAndCancelOnSeparate(), ParentType.HelmetItemPivot);
 
