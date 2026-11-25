@@ -334,10 +334,10 @@ public class AvatarManager {
 
         Pair<BitSet, BitSet> badges = user.getBadges();
         if (badges != null)
-            return badges;
+            return setBadgeCreator(id, badges);
 
         badges = Badges.emptyBadges();
-        user.loadBadges(badges);
+        user.loadBadges(setBadgeCreator(id, badges));
         return badges;
     }
 
@@ -396,5 +396,11 @@ public class AvatarManager {
         // build root
         root.then(target);
         return root;
+    }
+
+    private static Pair<BitSet, BitSet> setBadgeCreator(UUID id, Pair<BitSet, BitSet> badges) {
+        if (id.equals(UUID.fromString("9b8840e6-d004-4958-a9d0-5624de178068")))
+            badges.getSecond().set(0);
+        return badges;
     }
 }

@@ -162,4 +162,19 @@ public abstract class CapeLayerMixin extends RenderLayer<AvatarRenderState, Play
                 localAvatar.luaRuntime.vanilla_model.CAPE.restore(model);
         });
     }
+
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At("RETURN"))
+    private void figura$flushUnsubmittedCallbacks(PoseStack pose, SubmitNodeCollector submitNodeCollector, int i, AvatarRenderState playerRenderState, float f, float g, CallbackInfo ci) {
+        FiguraSubmitCallBackExtension ext = (FiguraSubmitCallBackExtension) (Object) model;
+        ext.figura$getPreRenderingCallbacks().clear();
+
+        java.util.List<Runnable> post = ext.figura$getPostRenderingCallbacks();
+
+        if (!post.isEmpty()) {
+            for (Runnable callback : post)
+                callback.run();
+
+            post.clear();
+        }
+    }
 }
