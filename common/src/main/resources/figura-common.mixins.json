@@ -108,6 +108,7 @@
         "render.layers.items.ItemInHandLayerMixin",
         "render.layers.items.PlayerItemInHandLayerMixin",
         "render.model.ModelMixin",
+        "render.model.ModelPartAccessor",
         "render.model.ModelPartMixin",
         "render.model.PartPoseMixin",
         "render.nodeRenderer.ItemDisplayContextMixin",

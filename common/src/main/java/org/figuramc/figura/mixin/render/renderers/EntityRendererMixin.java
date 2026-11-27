@@ -23,6 +23,7 @@ import org.figuramc.figura.ducks.EntityRendererAccessor;
 import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.lua.api.nameplate.EntityNameplateCustomization;
 import org.figuramc.figura.permissions.Permissions;
+import org.figuramc.figura.utils.NameplateUtils;
 import org.figuramc.figura.utils.TextUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -214,6 +215,10 @@ public abstract class EntityRendererMixin<T extends Entity, S extends EntityRend
         }
 
         FiguraMod.popPushProfiler("applyName");
-        return TextUtils.replaceInText(text, "\\b" + Pattern.quote(player.nameTag.getString()) + "\\b", replacement);
+        if (text.getString().equals(player.nameTag.getString()))
+            return replacement;
+
+        Entity entity = Minecraft.getInstance().level == null ? null : Minecraft.getInstance().level.getEntity(player.id);
+        return NameplateUtils.buildEntityName(text, player.nameTag, avatar, entity == null ? null : entity.getUUID());
     }
 }

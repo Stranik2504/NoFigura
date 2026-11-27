@@ -24,6 +24,9 @@ public class NameplateUtils {
         if (id != null)
             replacement = Badges.appendBadges(replacement, id, config > 1);
 
+        if (text.getString().equals(name.getString()))
+            return replacement;
+
         return TextUtils.replaceInText(text, "\\b" + Pattern.quote(name.getString()) + "\\b", replacement);
     }
 
