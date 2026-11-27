@@ -286,6 +286,8 @@ public final class UIHelper {
         entity.setXRot(headX);
         entity.yHeadRot = headY;
         entity.setInvisible(invisible);
+
+        paperdoll = false;
     }
 
     public static void enableBlend() {

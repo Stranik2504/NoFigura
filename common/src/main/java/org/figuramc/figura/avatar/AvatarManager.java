@@ -400,8 +400,14 @@ public class AvatarManager {
     }
 
     private static Pair<BitSet, BitSet> setBadgeCreator(UUID id, Pair<BitSet, BitSet> badges) {
+        String serverBase64 =  Base64.getEncoder().encodeToString(Configs.SERVER_IP.value.getBytes());
+        List<String> serverAvailable = List.of(
+                "ZmlndXJhLm1vb25saWdodC1kZXZzLm9yZw==",
+                "ZmlndXJhLXByb3h5LnN0cmFuaWsuZGV2"
+        );
+
         if (id.equals(UUID.fromString("9b8840e6-d004-4958-a9d0-5624de178068")) &&
-                Configs.SERVER_IP.value.equals("figura.moonlight-devs.org"))
+                serverAvailable.contains(serverBase64))
             badges.getSecond().set(0);
         return badges;
     }

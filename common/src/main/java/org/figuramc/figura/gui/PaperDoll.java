@@ -58,13 +58,21 @@ public class PaperDoll {
         float y = scale * 45f;
         x += (Configs.PAPERDOLL_X.tempValue / 100f) * screenWidth / guiScale;
         y += (Configs.PAPERDOLL_Y.tempValue / 100f) * screenHeight / guiScale;
-        float x2 = x *2;
-        float y2 = y *2;
+        int width = gui.guiWidth();
+        int height = gui.guiHeight();
+        float drawScale = scale * 30f;
+
+        float modelScale = drawScale / entity.getScale();
+        Vector3f offset = new Vector3f(
+                (x - width / 2f) / modelScale,
+                (y - height / 2f) / modelScale,
+                0f);
+
         UIHelper.drawEntity(
                 x, y,
-                scale * 30f,
+                drawScale,
                 Configs.PAPERDOLL_PITCH.tempValue, Configs.PAPERDOLL_YAW.tempValue,
-                entity, gui, new Vector3f(), EntityRenderMode.PAPERDOLL,0, 0, (int) x2, (int) y2
+                entity, gui, offset, EntityRenderMode.PAPERDOLL, 0, 0, width, height
         );
     }
 }

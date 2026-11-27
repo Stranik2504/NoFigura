@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.renderer.feature.FeatureRendererType;
 import net.minecraft.client.renderer.feature.submit.BatchableSubmit;
 import net.minecraft.client.renderer.feature.submit.SubmitNode;
+import net.minecraft.client.renderer.feature.submit.TranslucentSubmit;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import org.figuramc.figura.model.rendertasks.RenderTask;
 import org.jspecify.annotations.NonNull;
@@ -18,9 +19,29 @@ public record FiguraSubmission(
     Map<RenderType, List<Consumer<VertexConsumer>>> secondaryBuffers,
     List<QueuedRenderTask> renderTasks,
     List<QueuedPivotBox> pivotBoxes,
-    int outlineColor
-) implements SubmitNode, BatchableSubmit {
+    int outlineColor,
+    Pass pass
+) implements SubmitNode, BatchableSubmit, TranslucentSubmit {
     public static final FeatureRendererType<FiguraSubmission> TYPE = FeatureRendererType.create("figura:avatar_submission");
+
+    public enum Pass { SOLID, TRANSLUCENT, SEE_THROUGH, OUTLINE }
+
+    public FiguraSubmission(Map<RenderType, List<Consumer<VertexConsumer>>> primaryBuffers,
+                            Map<RenderType, List<Consumer<VertexConsumer>>> secondaryBuffers,
+                            List<QueuedRenderTask> renderTasks,
+                            List<QueuedPivotBox> pivotBoxes,
+                            int outlineColor) {
+        this(primaryBuffers, secondaryBuffers, renderTasks, pivotBoxes, outlineColor, Pass.SOLID);
+    }
+
+    public FiguraSubmission withPass(Pass pass) {
+        return new FiguraSubmission(primaryBuffers, secondaryBuffers, renderTasks, pivotBoxes, outlineColor, pass);
+    }
+
+    @Override
+    public float distanceToCameraSq() {
+        return 0f;
+    }
 
     @Override
     public Object batchKey() {

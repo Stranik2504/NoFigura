@@ -2,6 +2,7 @@ package org.figuramc.figura.utils;
 
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
 import com.mojang.renderpearl.api.pipeline.ShaderType;
+import org.figuramc.figura.compat.IrisCompat;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,7 +59,14 @@ public final class WorldRenderPipelines {
             return base;
 
         Map<RenderPipeline, RenderPipeline> cache = unlit ? UNLIT_CACHE : FLAT_CACHE;
-        return cache.computeIfAbsent(base, pipeline -> create(pipeline, unlit));
+        return cache.computeIfAbsent(base, pipeline -> {
+            RenderPipeline created = create(pipeline, unlit);
+
+            if (PlatformUtils.isModLoaded("iris"))
+                IrisCompat.copyPipeline(pipeline, created);
+
+            return created;
+        });
     }
 
     private static RenderPipeline create(RenderPipeline base, boolean unlit) {

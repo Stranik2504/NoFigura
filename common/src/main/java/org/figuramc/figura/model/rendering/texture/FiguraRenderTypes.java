@@ -83,6 +83,7 @@ public enum FiguraRenderTypes {
                                         .sortOnUpload()
                                         .useOverlay()
                                         .setOutline(affectsOutline ? RenderSetup.OutlineProperty.AFFECTS_OUTLINE : RenderSetup.OutlineProperty.NONE)
+                                        .setOitPipelines(RenderPipelines.OIT_BEACON_BEAM)
                                         .createRenderSetup()
                         )
         );
@@ -115,6 +116,7 @@ public enum FiguraRenderTypes {
                                             FilterMode.LINEAR, FilterMode.LINEAR, abstractTexture.getSampler().getMaxAnisotropy(), abstractTexture.getSampler().getMaxLod());
                                 })
                                 .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
+                                .setOitPipelines(RenderPipelines.OIT_ENTITY)
                                 .createRenderSetup()
                 )
         );
@@ -125,6 +127,7 @@ public enum FiguraRenderTypes {
                         RenderSetup.builder(RenderPipelines.GLINT)
                                 .withTexture("Sampler0", texture)
                                 .setTextureTransform(TextureTransform.ENTITY_GLINT_TEXTURING)
+                                .withForcedSolidModelPhase()
                                 .createRenderSetup()
                 )
         );

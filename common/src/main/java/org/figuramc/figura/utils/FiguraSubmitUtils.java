@@ -1,6 +1,7 @@
 package org.figuramc.figura.utils;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import net.minecraft.client.renderer.SubmitNodeCollection;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeStorage;
 import net.minecraft.client.renderer.rendertype.RenderType;
@@ -15,7 +16,15 @@ public class FiguraSubmitUtils {
     public static void submit(SubmitNodeCollector collector, FiguraSubmission submission) {
         if (submission == null) return;
         if (collector instanceof SubmitNodeStorage storage) {
-            storage.order(0).translucentCustomGeometry.submit(submission);
+            SubmitNodeCollection collection = storage.order(0);
+            collection.solid.submit(submission.withPass(FiguraSubmission.Pass.SOLID));
+            collection.translucentCustomGeometry.submit(submission.withPass(FiguraSubmission.Pass.TRANSLUCENT));
+
+            if (!submission.renderTasks().isEmpty())
+                storage.seeThrough().submit(submission.withPass(FiguraSubmission.Pass.SEE_THROUGH));
+
+            if (submission.outlineColor() != 0)
+                collection.outline.submit(submission.withPass(FiguraSubmission.Pass.OUTLINE));
         }
     }
 
