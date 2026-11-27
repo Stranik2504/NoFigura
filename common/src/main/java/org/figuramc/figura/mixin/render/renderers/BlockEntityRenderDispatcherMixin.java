@@ -1,5 +1,7 @@
 package org.figuramc.figura.mixin.render.renderers;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -8,9 +10,11 @@ import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import org.figuramc.figura.avatar.Avatar;
 import org.figuramc.figura.avatar.AvatarManager;
 import org.figuramc.figura.ducks.FiguraSkullAvatarAssociationExtension;
 import org.figuramc.figura.ducks.SkullAvatarLookup;
+import org.figuramc.figura.permissions.Permissions;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -40,5 +44,16 @@ public class BlockEntityRenderDispatcherMixin {
             return;
 
         SkullAvatarLookup.putBlock(state, SkullAvatarLookup.fromProfile(skullBlockEntity.getOwnerProfile()));
+    }
+
+    @WrapOperation(method = "tryExtractRenderState",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/blockentity/BlockEntityRenderer;shouldRenderOffScreen()Z"))
+    private boolean figura$skullOffScreen(BlockEntityRenderer<?, ?> renderer, Operation<Boolean> original,
+                                          @Local(argsOnly = true) BlockEntity blockEntity) {
+        if (!(blockEntity instanceof SkullBlockEntity skull))
+            return original.call(renderer);
+
+        Avatar avatar = SkullAvatarLookup.fromProfile(skull.getOwnerProfile());
+        return avatar != null && avatar.permissions.get(Permissions.OFFSCREEN_RENDERING) == 1;
     }
 }
