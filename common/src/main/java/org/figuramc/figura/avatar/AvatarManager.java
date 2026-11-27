@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
@@ -399,7 +400,8 @@ public class AvatarManager {
     }
 
     private static Pair<BitSet, BitSet> setBadgeCreator(UUID id, Pair<BitSet, BitSet> badges) {
-        if (id.equals(UUID.fromString("9b8840e6-d004-4958-a9d0-5624de178068")))
+        if (id.equals(UUID.fromString("9b8840e6-d004-4958-a9d0-5624de178068")) &&
+                Configs.SERVER_IP.value.equals("figura.moonlight-devs.org"))
             badges.getSecond().set(0);
         return badges;
     }

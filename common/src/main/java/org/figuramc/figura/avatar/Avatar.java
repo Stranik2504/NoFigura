@@ -719,7 +719,6 @@ public class Avatar {
         stack.last().pose().scale(16, 16, -16);
         stack.last().normal().scale(1, 1, -1);
 
-        Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_FLAT);
         /*GlStateManager._disableDepthTest();*/
 
         renderer.entity = entity;
@@ -733,7 +732,6 @@ public class Avatar {
         renderer.renderSpecialParts();
 
         /*GlStateManager._enableDepthTest();*/
-        Minecraft.getInstance().gameRenderer.lighting().setupFor(Lighting.Entry.ITEMS_3D);
         stack.popPose();
 
         FiguraMod.popProfiler(2);
