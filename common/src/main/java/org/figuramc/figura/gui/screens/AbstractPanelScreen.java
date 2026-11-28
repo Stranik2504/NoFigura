@@ -82,9 +82,6 @@ public abstract class AbstractPanelScreen extends Screen {
 
     @Override
     public void extractRenderState(GuiGraphicsExtractor gui, int mouseX, int mouseY, float delta) {
-        // setup figura framebuffer
-        // UIHelper.useFiguraGuiFramebuffer();
-
         // render background
         this.renderBackground(gui, delta);
 
@@ -93,9 +90,6 @@ public abstract class AbstractPanelScreen extends Screen {
 
         // render overlays
         this.renderOverlays(gui, mouseX, mouseY, delta);
-
-        // restore vanilla framebuffer
-        // UIHelper.useVanillaFramebuffer();
     }
 
     public void renderBackground(GuiGraphicsExtractor gui, float delta) {

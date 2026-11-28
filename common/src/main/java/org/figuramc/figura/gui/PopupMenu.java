@@ -1,6 +1,5 @@
 package org.figuramc.figura.gui;
 
-import com.mojang.renderpearl.backend.opengl.GlStateManager;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
@@ -92,7 +91,6 @@ public class PopupMenu {
             return;
         }
 
-        /*GlStateManager._disableDepthTest();*/
         Matrix3x2fStack pose = gui.pose();
         pose.pushMatrix();
 
