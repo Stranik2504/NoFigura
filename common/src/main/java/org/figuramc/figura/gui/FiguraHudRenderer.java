@@ -1,11 +1,13 @@
 package org.figuramc.figura.gui;
 
+import com.mojang.blaze3d.platform.Lighting;
 import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.blaze3d.ProjectionType;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.textures.*;
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.render.GuiRenderer;
 import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.gui.render.pip.PictureInPictureRenderer;
@@ -77,14 +79,20 @@ public class FiguraHudRenderer extends PictureInPictureRenderer<FiguraHudRenderS
         } finally {
             HudRenderContext.endHudPass();
         }
+
+        Lighting lighting = Minecraft.getInstance().gameRenderer.lighting();
+
         try (
                 frame;
                 RenderPass pass = RenderSystem.getDevice()
                         .createCommandEncoder()
                         .createRenderPass(() -> "FiguraHud", textureView, Optional.empty(), depthTextureView, OptionalDouble.empty())
         ) {
+            lighting.setupFor(Lighting.Entry.ITEMS_FLAT);
             RenderSystem.bindDefaultUniforms(pass);
             FeatureRenderDispatcher.renderAllFeatures(pass, frame);
+        } finally {
+            lighting.setupFor(Lighting.Entry.ITEMS_3D);
         }
 
         this.blitTexture(state, guiRenderState);

@@ -80,6 +80,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
@@ -123,6 +124,7 @@ public class Avatar {
     public final PermissionPack.PlayerPermissionPack permissions;
 
     public final Map<String, SoundBuffer> customSounds = new HashMap<>();
+    private final Map<String, byte[]> customSoundData = new ConcurrentHashMap<>();
     public final Map<Integer, Animation> animations = new HashMap<>();
 
     // runtime status
@@ -1088,6 +1090,7 @@ public class Avatar {
             renderer.invalidate();
 
         clearSounds();
+        customSoundData.clear();
         clearParticles();
         closeBuffers();
         closeStreams();
@@ -1257,6 +1260,8 @@ public class Avatar {
     }
 
     public void loadSound(String name, byte[] data) throws Exception {
+        customSoundData.put(name, data);
+
         if (SoundAPI.getSoundEngine().figura$isEngineActive()) {
             try (ByteArrayInputStream inputStream = new ByteArrayInputStream(data); JOrbisAudioStream oggAudioStream = new JOrbisAudioStream(inputStream)) {
                 SoundBuffer sound = new SoundBuffer(oggAudioStream.readAll(), oggAudioStream.getFormat());
@@ -1265,6 +1270,16 @@ public class Avatar {
         } else {
             FiguraMod.LOGGER.error("Sound is not supported or enabled on this system but a custom sound tried to load anyway, scripts may break.");
         }
+    }
+
+    public void reloadCustomSounds() {
+        customSoundData.forEach((name, data) -> {
+            try {
+                loadSound(name, data);
+            } catch (Exception e) {
+                FiguraMod.LOGGER.warn("Failed to reload custom sound \"" + name + "\"", e);
+            }
+        });
     }
 
     public FiguraTexture registerTexture(String name, NativeImage image, boolean ignoreSize) {

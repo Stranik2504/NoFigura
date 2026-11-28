@@ -40,6 +40,7 @@ import org.figuramc.figura.ducks.FiguraSubmitCallBackExtension;
 import org.figuramc.figura.lua.api.vanilla_model.VanillaPart;
 import org.figuramc.figura.mixin.render.layers.EquipmentLayerRendererAccessor;
 import org.figuramc.figura.mixin.render.layers.HumanoidArmorLayerAccessor;
+import org.figuramc.figura.mixin.render.model.ModelPartAccessor;
 import org.figuramc.figura.model.ParentType;
 import org.figuramc.figura.permissions.Permissions;
 import org.figuramc.figura.utils.FiguraArmorPartRenderer;
@@ -277,13 +278,17 @@ public abstract class HumanoidArmorLayerMixinFabric<S extends HumanoidRenderStat
     // Similar to vanilla's renderArmorModel, but it renders each part individually, instead of the whole model at once.
     // Could be optimized by calculating the tint, overlays, and trims beforehand instead of re-calculating for each ModelPart, but it's not super important.
     @Unique
-    private void figura$renderArmorPart(ModelPart modelPart, PoseStack poseStack, SubmitNodeCollector nodeCollector, int light, ItemStack itemStack, EquipmentSlot armorSlot) {
+    private void figura$renderArmorPart(ModelPart sharedPart, PoseStack poseStack, SubmitNodeCollector nodeCollector, int light, ItemStack itemStack, EquipmentSlot armorSlot) {
         boolean hasGlint = itemStack.hasFoil();
 
+        sharedPart.visible = true;
+        sharedPart.xRot = 0;
+        sharedPart.yRot = 0;
+        sharedPart.zRot = 0;
+        ModelPartAccessor partAccessor = (ModelPartAccessor) (Object) sharedPart;
+        ModelPart modelPart = new ModelPart(partAccessor.figura$getCubes(), partAccessor.figura$getChildren());
+        modelPart.loadPose(sharedPart.storePose());
         modelPart.visible = true;
-        modelPart.xRot = 0;
-        modelPart.yRot = 0;
-        modelPart.zRot = 0;
         EquipmentClientInfo.LayerType layerType = this.figura$usesInnerModel(armorSlot) ? EquipmentClientInfo.LayerType.HUMANOID_LEGGINGS : EquipmentClientInfo.LayerType.HUMANOID;
         Equippable equippable = itemStack.get(DataComponents.EQUIPPABLE);
 

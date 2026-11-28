@@ -108,8 +108,10 @@ public final class AvatarPartRenderTypes {
                 .affectsCrumbling()
                 .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE);
 
-        if (sort)
+        if (sort) {
             builder.sortOnUpload();
+            setOit(builder, base);
+        }
 
         RenderType type = RenderType.create(name, builder.createRenderSetup());
         VARIANTS.add(type);
@@ -144,5 +146,11 @@ public final class AvatarPartRenderTypes {
         RenderType type = RenderType.create(name, builder.createRenderSetup());
         VARIANTS.add(type);
         return type;
+    }
+
+    private static void setOit(RenderSetup.RenderSetupBuilder builder, RenderPipeline base) {
+        builder.setOitPipelines(base == RenderPipelines.ENTITY_TRANSLUCENT_CULL
+                ? RenderPipelines.OIT_ENTITY_CULL
+                : RenderPipelines.OIT_ENTITY);
     }
 }

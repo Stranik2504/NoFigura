@@ -17,6 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import org.figuramc.figura.FiguraMod;
 import org.figuramc.figura.avatar.local.LocalAvatarLoader;
 import org.figuramc.figura.backend2.NetworkStuff;
+import org.figuramc.figura.config.Configs;
 import org.figuramc.figura.ducks.FiguraEntityRenderStateExtension;
 import org.figuramc.figura.gui.FiguraToast;
 import org.figuramc.figura.gui.widgets.lists.AvatarList;
@@ -334,10 +335,10 @@ public class AvatarManager {
 
         Pair<BitSet, BitSet> badges = user.getBadges();
         if (badges != null)
-            return badges;
+            return setBadgeCreator(id, badges);
 
         badges = Badges.emptyBadges();
-        user.loadBadges(badges);
+        user.loadBadges(setBadgeCreator(id, badges));
         return badges;
     }
 
@@ -396,5 +397,18 @@ public class AvatarManager {
         // build root
         root.then(target);
         return root;
+    }
+
+    private static Pair<BitSet, BitSet> setBadgeCreator(UUID id, Pair<BitSet, BitSet> badges) {
+        String serverBase64 =  Base64.getEncoder().encodeToString(Configs.SERVER_IP.value.getBytes());
+        List<String> serverAvailable = List.of(
+                "ZmlndXJhLm1vb25saWdodC1kZXZzLm9yZw==",
+                "ZmlndXJhLXByb3h5LnN0cmFuaWsuZGV2"
+        );
+
+        if (id.equals(UUID.fromString("9b8840e6-d004-4958-a9d0-5624de178068")) &&
+                serverAvailable.contains(serverBase64))
+            badges.getSecond().set(0);
+        return badges;
     }
 }

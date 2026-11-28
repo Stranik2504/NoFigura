@@ -152,6 +152,9 @@ public class LuaSound {
 
         SoundAPI.getSoundEngine().figura$addSound(this);
 
+        // After restarting the sound engine, the buffer in customSounds is already new.
+        SoundBuffer current = buffer == null ? null : owner.customSounds.getOrDefault(id, buffer);
+
         if (buffer != null) {
             handle.execute(channel -> {
                 channel.setPitch(pitch);
@@ -160,7 +163,7 @@ public class LuaSound {
                 channel.setLooping(loop);
                 channel.setSelfPosition(pos.asVec3());
                 channel.setRelative(false);
-                channel.attachStaticBuffer(buffer);
+                channel.attachStaticBuffer(current);
                 channel.play();
             });
         } else {

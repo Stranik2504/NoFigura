@@ -765,10 +765,6 @@ public class ImmediateFiguraRenderer extends FiguraRenderer {
                 pos.set(vertex.x, vertex.y, vertex.z, 1);
                 pos.transform(customization.positionMatrix);
 
-                if (currentFilterScheme == PartFilterScheme.HUD &&
-                        Math.abs(pos.z) > HUD_OVERLAY_Z_THRESHOLD * HudRenderContext.scale())
-                    pos.z = 0.0;
-
                 pos.add(pos.normalized().scale(vertexData.vertexOffset));
                 normal.set(vertex.nx, vertex.ny, vertex.nz);
                 normal.transform(customization.normalMatrix);

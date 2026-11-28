@@ -105,6 +105,13 @@ public abstract class SoundEngineMixin implements SoundEngineAccessor {
             figura$stopAllSounds();
     }
 
+    // For reload using F3 + A
+    @Inject(at = @At("RETURN"), method = "reload")
+    private void figura$reloadCustomSounds(CallbackInfo ci) {
+        for (var avatar : AvatarManager.getLoadedAvatars())
+            avatar.reloadCustomSounds();
+    }
+
     // targeting getGain is more likely to target more versions of Minecraft, but targeting the `listeners` list blocks subtitles. I believe blocking subtitles was more important.
     // If we end up targeting a version of minecraft with no subtitles, use getGain. In vanilla, `listeners` is only used for subtitles and may not be in versions without subtitles.
     //@Inject(at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/audio/Listener;getGain()Z"), method = "play", cancellable = true)
