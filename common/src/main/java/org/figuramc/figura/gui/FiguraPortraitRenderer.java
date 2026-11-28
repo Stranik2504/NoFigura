@@ -40,7 +40,6 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
     private final ProjectionMatrixBuffer avatarProjectionMatrixBuffer = new ProjectionMatrixBuffer(
             "Portrait-PIP - " + this.getClass().getSimpleName()
     );
-    private final Projection avatarProjection = new Projection();
     private final SubmitNodeStorage submitNodeStorage = new SubmitNodeStorage();
     Map<Avatar, TextureEntry> avatarToTexture = new HashMap<>();
     private boolean renderSkin;
@@ -121,6 +120,7 @@ public class FiguraPortraitRenderer extends PictureInPictureRenderer<FiguraPortr
 
         gpuDevice.createCommandEncoder().clearColorAndDepthTextures(entry.texture, GuiRenderer.CLEAR_COLOR, entry.depthTexture, 0.0);
         // Use Minecraft's projection so clip-space depth matches the active RenderPearl backend.
+        Projection avatarProjection = new Projection();
         avatarProjection.setupOrtho(-1000.0F, 1000.0F, i, j, true);
         RenderSystem.setProjectionMatrix(avatarProjectionMatrixBuffer.getBuffer(avatarProjection), ProjectionType.ORTHOGRAPHIC);
     }
